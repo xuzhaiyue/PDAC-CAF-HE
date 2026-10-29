@@ -1,0 +1,27 @@
+output: results/he/A15/2026-10-27_run01
+scope: results/he/A13/2026-10-22_run01/scope.tsv
+tcga_ids: results/he/tcga_targets.tsv
+tcga_features: results/he/cache_own/tcga
+tcga_status: results/he/cache_own/tcga/extraction_status.tsv
+tcga_slide_cache: results/he/cache_own/tcga/slides
+tcga_wsis: /Volumes/INTENSO/TCGA_PAAD_svs
+a12: results/he/A12/2026-10-21_run01
+a10: results/he/A10/2026-10-21_run01
+a9: results/he/A9
+hest_cache: results/he/A8/hest
+geo_cache: results/he/A9/geo
+reference_seed: 20261027
+source_fit_tiles: 64
+pixels_per_tile: 4096
+OD_tissue_threshold_all_channels: 0.15
+angular_percentiles:
+- 1
+- 99
+concentration_percentile: 99
+source_seed: SHA256(A15:sample) first8 little endian
+background_rule: 'max OD <= .15: preserve original RGB'
+failure_rule: stop, no identity fallback
+threads: 2
+batch: 32
+pause_s: 0.05
+max_load1: 8

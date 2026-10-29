@@ -1,0 +1,84 @@
+# Aim 1 — 核形态是否携带"超出周围组织"的分子信息（4 位未治疗 PDAC 患者的 Visium HD）
+# 规则：建模（scripts/07）之前，本文件的 analysis 段必须冻结；07 会把本文件的哈希写进结果。
+
+paths:
+  spaceranger_root: /Users/Zhaiyue/VISIUMHDdata
+  he_dir: null               # 原始 H&E 所在目录（原地读取，不拷贝进项目）；也可在 samples 里直接写绝对路径
+  work_dir: /Users/Zhaiyue/PDAC_HE_Morphotype/results
+  gene_programs: /Users/Zhaiyue/PDAC_HE_Morphotype/config/gene_programs.yaml
+  uni2h_weights: null        # 本地 UNI2-h 权重（.bin/.pth）；null 则从 HF hub 拉取（需已获授权）
+
+# A1/D1 等只是捕获区编号；分组单位是 patient_id
+# he_image：完整分辨率 H&E。原图不在本机，直接从 Loupe 文件读取（spaceranger 把 --image 原图以无损 PNG 瓦片嵌在
+# segmented_outputs/cloupe.cloupe 中；2026-10-14 已核对：尺寸与 spaceranger 完全一致，与 hires 缩略图 r ≥ 0.99）。
+# 也可改成原图路径（文件名相对 he_dir，或绝对路径）；必须是 spaceranger --image 用过的那个文件。
+samples:
+  - {sample_id: A1, patient_id: HD6832, outs: HDA1_count/outs, he_image: /Users/Zhaiyue/VISIUMHDdata/HDA1_count/outs/segmented_outputs/cloupe.cloupe}
+  - {sample_id: D1, patient_id: HD8130, outs: HDD1_count/outs, he_image: /Users/Zhaiyue/VISIUMHDdata/HDD1_count/outs/segmented_outputs/cloupe.cloupe}
+  - {sample_id: A2, patient_id: HD7821, outs: HDA2_count/outs, he_image: /Users/Zhaiyue/VISIUMHDdata/HDA2_count/outs/segmented_outputs/cloupe.cloupe}
+  # D2 的患者编号由 Loupe 内嵌原图名 HD7743.jpg 推断，待确认
+  - {sample_id: D2, patient_id: HD7743, outs: HDD2_count/outs, he_image: /Users/Zhaiyue/VISIUMHDdata/HDD2_count/outs/segmented_outputs/cloupe.cloupe}
+
+image:
+  model_mpp: 0.25            # CellViT++ 模型是 x40，总在 ≈0.25 µm/px 推理（输入不是这个分辨率会在内部插值）；UNI2-h 的 112 µm tile 再缩到 224 px
+  # 4 张切片原始分辨率不同（A1/D1 ≈0.36，A2/D2 ≈0.68 µm/px）。分辨率差异会和患者差异混在一起。
+  # 主分析：所有切片先降到 effective_mpp 再重采样到 model_mpp，使有效分辨率一致；
+  # 敏感性分析：effective_mpp: null（各自原始分辨率）。
+  effective_mpp: 0.68
+
+cellvit:
+  model: HIPT                # 先用 HIPT；SAM-H 计算量大
+  outdir_name: cellvit
+  malignant_classes: [Neoplastic]          # 主分析
+  epithelial_classes: [Neoplastic, Epithelial]  # 敏感性分析
+  device: mps                # Mac Studio；官方代码写死 cuda，需要先适配（见 README）
+
+matching:
+  max_centroid_dist_um: 4.0  # CellViT 核 ↔ 10x 核 质心最大距离
+  min_iou: 0.1               # 10x 核多边形是 2 µm bin 拼成的，IoU 天然偏低
+
+gating:
+  # 恶性上皮核 = 病理肿瘤区 ∧ CellViT++ 类别。
+  # 不用单细胞表达做硬门控：01 显示角蛋白在每个细胞只有 ~0.3 UMI，腺泡转录本扩散到大多数细胞。
+  # 表达只在区域层面做质控（上皮富集、腺泡占比低）。
+  tumor_annotation_dir: /Users/Zhaiyue/PDAC_HE_Morphotype/data/annotations   # {sample_id}_tumor.geojson（QuPath，full-res 坐标）
+  epi_genes: [KRT19, KRT8, KRT18, EPCAM, KRT7]
+  region_min_keratin_umi_per_100um: 20
+  region_max_acinar_share: 0.2
+
+analysis:
+  primary_unit: region       # 主分析：微区域；cell 为辅助
+  # 01 的 split-half 可靠性（4 个样本范围）：MPAS 50µm 0.16–0.27 | 100µm 0.35–0.66 | 150µm 0.57–0.85 | 200µm 0.66–0.90
+  #                                          Classical/Basal 100µm 0.49–0.97
+  region_sizes_um: [100, 150, 200]
+  primary_region_um: {MPAS: 150, MAPK_extended: 150, moffitt_classical: 100, moffitt_basal: 100}   # 建模前冻结
+  min_malignant_nuclei_per_region: 5
+  min_target_pool_umi_per_region: 500   # 目标池（恶性细胞）的非腺泡 UMI
+  targets_primary: [MPAS]
+  targets_secondary: [MAPK_extended, moffitt_classical, moffitt_basal]
+  score: log_sum_cp10k       # log1p(1e4 * 程序基因UMI / 非腺泡非内分泌总UMI)
+  target_pool: malignant     # malignant：只汇总恶性核匹配到的 10x 细胞；敏感性：all（区域内全部细胞）
+  decision_min_dR2: 0.02     # 预先指定：ΔR²(AB−B) 在 ≥3/4 患者中 > 此值，且高于空间平移与随机基因集零分布的 95% 分位
+  context:
+    tile_um: 112             # UNI2-h：112 µm（0.25 µm/px 下 448 px）缩放到 224 px ≈ 0.5 µm/px
+    mode: ring               # ring：中心区域四周 8 块不重叠 tile 的均值（中心完全不可见）
+    sensitivity_modes: [masked_center]   # 一块大窗口、中心涂灰
+  feature_sets:              # 所有模型都含 Q（技术协变量）
+    Q:   [Q]
+    H:   [H, Q]              # 传统核形态（面积、圆度、H 染色强度…）
+    A:   [A, Q]              # CellViT++ 核 embedding
+    B:   [B, Q]              # 遮蔽中心后的邻域 UNI2-h
+    AB:  [A, B, Q]
+    HB:  [H, B, Q]
+    AHB: [A, H, B, Q]
+  key_contrasts:             # ΔR² = R²(full) − R²(reduced)
+    - [AB, B]                # 核形态在邻域之外的增量（主要指标）
+    - [AHB, HB]              # 深度 embedding 在传统形态 + 邻域之外的增量
+    - [HB, B]
+  model: ridge
+  alphas: [0.1, 1, 10, 100, 1000, 10000]
+  pca_components: {A: 50, B: 50}
+  per_slide_feature_centering: false   # 敏感性分析改为 true（不使用标签，但会用到测试切片的特征）
+  n_spatial_permutations: 200
+  n_random_genesets: 200
+  random_seed: 20261014

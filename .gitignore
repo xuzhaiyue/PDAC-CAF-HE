@@ -1,0 +1,24 @@
+# 只管代码、配置和文档（用户 2026-10-28 同意 git init）；数据与结果不进版本库
+results/
+data/
+99_tmp/
+Rplots.pdf
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+# 文档中的图片、网页与大文件（工作日志的截图 / 预览）
+docs/**/*.png
+docs/**/*.jpg
+docs/**/*.jpeg
+docs/**/*.tif
+docs/**/*.tiff
+docs/**/*.pdf
+docs/**/*.svg
+docs/**/*.html
+docs/**/*.html.before
+docs/**/*.gz
+docs/**/*.npz
+docs/**/*.npy
+docs/**/*.pt
+docs/**/*.zip

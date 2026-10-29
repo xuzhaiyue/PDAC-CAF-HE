@@ -1,0 +1,27 @@
+name: hemorph
+channels: [conda-forge]
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - pyarrow
+  - scikit-learn
+  - scanpy
+  - anndata
+  - h5py
+  - shapely>=2
+  - opencv
+  - tifffile
+  - imagecodecs
+  - openslide-python
+  - pyyaml
+  - matplotlib
+  - leidenalg
+  - python-igraph
+  - pillow
+  # torch 也从 conda-forge 装：pip 版 torch 自带 libomp，会和 conda 的 sklearn/opencv 冲突（OMP Error #15）
+  - pytorch
+  - torchvision
+  - timm>=1.0
+  - huggingface_hub
