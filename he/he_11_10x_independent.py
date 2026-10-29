@@ -1,9 +1,9 @@
-"""修订 A6：10x 公开胰腺癌 Visium HD（3′，新鲜冰冻）作完全独立的空间测试（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 A6。
+"""Amendment A6: public 10x PDAC Visium HD section (3′, fresh frozen) as a fully independent spatial test (hemorph environment, MPS). Rules in A6 of config/fig1.yaml.
 
-1) 图块特征：tissue_image.btf，128 µm 网格、组织掩膜、全部组织图块、UNI2-h（同 he_09）
-2) 标签：8 µm bin 按中心落入图块 / 区域汇总（无细胞核分割，区域筛选用非腺泡 UMI ≥ 500 代替细胞数）
-3) 模型：全部只用 TCGA（及 4 例自有 HD，仅 I1_I2）训练，3 个种子，冻结后在此样本上一次性评估
-输出：results/he/hd/10x_PDAC.npz、results/he/A6/{spatial_10x.tsv, spatial_tiles_10x.tsv.gz}
+1) Tile features: tissue_image.btf, 128 µm grid, tissue mask, all tissue tiles, UNI2-h (as he_09)
+2) Labels: 8 µm bins aggregated by centre into tiles / regions (no nucleus segmentation; non-acinar UMI >= 500 replaces cell count for region filtering)
+3) Models: trained on TCGA only (plus the 4 PDAC Visium HD sections for I1_I2), 3 seeds, evaluated once on this section after fixing
+Outputs: results/he/hd/10x_PDAC.npz, results/he/A6/{spatial_10x.tsv, spatial_tiles_10x.tsv.gz}
 """
 from __future__ import annotations
 

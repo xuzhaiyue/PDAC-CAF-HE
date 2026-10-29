@@ -1,12 +1,12 @@
-"""T4 补充表 v2（Claude 2026-10-28）：按当前 Figure 1–3 与补充图重新组织，只转录已有冻结结果，不新增检验。
+"""Supplementary tables v2: reorganised by Figures 1–3 and the supplementary figures; transcribes existing fixed results only, no new tests.
 
-与 v1（results/tables/2026-10-22_run01）的区别：
-- S1–S4（单细胞、基因、已发表基因集、生存队列）直接沿用 v1 表，先核对 v1 记录的来源 hash 未变
-- S5 改为 Figure 2 病人层面：AUC 汇总、组织代理（Fig 2c）、StRoMA 复现（A4）、A8 / A9 CI
-- S6 每张切片一行：保存方式、部位、改正后的 µm/px（GEO 按 65 µm 口径 ×65/55）、A10 / A12 / A15 / A14 各列，及其在图中的用途
-- S7 新增：患者层面 ρ（25 人）与全部配对比较 / 相关检验（A10、A12、A13、A15、A14；A16 完成后自动并入）
-输出 results/tables/2026-10-28_run02/：xlsx + 每表 TSV + input_manifest + verification.json。
-scRNA 环境（pandas + xlsxwriter + openpyxl）；nice 19，只读 TSV，不读 npz / 原始数据。
+Differences from v1 (results/tables/2026-10-22_run01):
+- S1–S4 (single cell, genes, published gene sets, survival cohorts) reuse the v1 tables after checking that the source hashes recorded by v1 are unchanged
+- S5 patient level: AUC summary, tissue proxies (Fig 2c), StRoMA replication (A4), A8 / A9 CIs
+- S6 one row per section: preservation, site, corrected µm/px (GEO ×65/55 under the 65 µm convention), A10 / A12 / A15 / A14 columns and use in figures
+- S7 new: patient-level ρ (25 patients) and all paired comparisons / correlation tests (A10, A12, A13, A15, A14; A16 merged automatically when complete)
+Output results/tables/2026-10-28_run02/: xlsx + one TSV per table + input_manifest + verification.json.
+scRNA environment (pandas + xlsxwriter + openpyxl); nice 19; reads TSVs only, no npz / raw data.
 """
 from __future__ import annotations
 
@@ -20,12 +20,12 @@ import pandas as pd
 
 PROJ = Path(__file__).resolve().parents[1]
 V1 = PROJ / "results/tables/2026-10-22_run01"
-OUT = Path(os.environ.get("T4_OUT", PROJ / "results/tables/2026-10-28_run02"))   # A16 完成后用新目录重跑
+OUT = Path(os.environ.get("T4_OUT", PROJ / "results/tables/2026-10-28_run02"))   # re-run into a new directory after A16 completes
 HE = PROJ / "results/he"
 A10, A12, A13 = HE / "A10/2026-10-21_run01", HE / "A12/2026-10-21_run01", HE / "A13/2026-10-22_run01"
 A14, A15, A16 = HE / "A14/2026-10-27_run01", HE / "A15/2026-10-27_run01", HE / "A16/2026-10-28_run02"
 A17 = HE / "A17/2026-10-28_run01"
-K = 65.0 / 55.0                       # GEO 真实 µm / 旧 µm（Space Ranger spot_diameter_fullres = 65 µm）
+K = 65.0 / 55.0                       # true GEO µm / old µm (Space Ranger spot_diameter_fullres = 65 µm)
 GEO = {"GSE211895", "GSE274557", "GSE327056"}
 SITE = {"Primary PDAC": "Primary", "Pancreatic cancer": "Primary", "pancreatic cancer tussue": "Primary", "tumor stroma": "Primary",
         "Peritoneal metastasis": "Peritoneal metastasis", "Liver metastasis": "Liver metastasis", "Lung metastasis": "Lung metastasis",
@@ -54,12 +54,12 @@ def add(name, title, df, figure, source, note=""):
 def main():
     if os.getpriority(os.PRIO_PROCESS, 0) < 19:
         os.nice(19 - os.getpriority(os.PRIO_PROCESS, 0))
-    assert not (OUT / "Supplementary_Tables.xlsx").exists(), "不覆盖已有结果"
+    assert not (OUT / "Supplementary_Tables.xlsx").exists(), "do not overwrite existing results"
     OUT.mkdir(parents=True, exist_ok=True)
 
-    # ---- S1–S4：沿用 v1，先核对 v1 记录的来源未变
+    # ---- S1–S4: reuse v1 after checking that the recorded sources are unchanged
     man1 = pd.read_csv(V1 / "input_manifest.tsv", sep="\t")
-    def same(r):   # config 只在末尾追加修订：v1 记录的字节须为现文件的前缀
+    def same(r):   # config only appends amendments: the bytes recorded by v1 must be a prefix of the current file
         b = Path(r.path).read_bytes()
         return hashlib.sha256(b).hexdigest() == r.sha256 or (r.path.endswith("config/fig1.yaml") and hashlib.sha256(b[:r.bytes]).hexdigest() == r.sha256)
     changed = [r.path for r in man1.itertuples() if r.sha256 != "metadata_only_large_file" and Path(r.path).exists() and not same(r)]
@@ -86,7 +86,7 @@ def main():
     for name, title, fig, note in v1:
         add(name, title, read(V1 / f"{name}.tsv"), fig, f"v1 table {V1.relative_to(PROJ)}/{name}.tsv (sources hash-checked)", note)
 
-    # ---- S5：Figure 2 病人层面
+    # ---- S5: patient level
     auc = read(HE / "auc_summary.tsv")
     fig2b = read(PROJ / "results/manuscript_figures/2026-10-28_Figure2_v9/data/panel_b_24_auc_and_CI.csv", sep=",")
     key = ["model", "cohort", "target"]
@@ -111,7 +111,7 @@ def main():
         add(f"S5_{tag}_CI", f"{tag}: spatial-only models evaluated on TCGA/CPTAC patients", d, "Supp",
             f"results/he/{tag}/ci_paired.tsv", "No model selection on TCGA/CPTAC; comparison direction follows the column names.")
 
-    # ---- S5（续）：Figure 4 的 H&E 预后与肿瘤生物学关联（2026-10-28 Figure 4 v2 后追加）
+    # ---- S5 (cont.): H&E prognosis and tumour-biology associations
     add("S5_prognosis_A7", "Prognosis of bulk-trained H&E predictions (A7)", read(HE / "A7/per_cohort.tsv"), "Fig 4e",
         "results/he/A7/per_cohort.tsv", "Per SD; univariable and age + stage multivariable; TCGA out-of-fold, CPTAC external.")
     add("S5_prognosis_A7_pooled", "Prognosis of bulk-trained H&E predictions, pooled (A7)", read(HE / "A7/pooled.tsv"), "Fig 4e",
@@ -123,7 +123,7 @@ def main():
     add("S4_biology", "Relative score versus tumour characteristics", read(PROJ / "results/fig2/D_biology.tsv"), "Fig 4d",
         "results/fig2/D_biology.tsv", "Exploratory; Spearman for continuous items, Wilcoxon / Kruskal for KRAS.")
 
-    # ---- S6：切片
+    # ---- S6: sections
     s1 = read(V1 / "S6_spatial_samples.tsv")
     s10 = read(A10 / "slide_rho.tsv"); s12 = read(A12 / "slide_rho.tsv"); s15 = read(A15 / "slide_rho.tsv")
     m15 = read(A15 / "image_metrics_70.tsv"); d14 = read(A14 / "slide_domain.tsv")
@@ -132,7 +132,7 @@ def main():
     sec = sec.merge(s12[["sample", "S0_128", "S1_128", "S2_historical", "n_regions"]], on="sample", suffixes=("", "_A12"))
     assert (sec.n_regions == sec.n_regions_A12).all() and np.allclose(sec.rho_S2_PDAC_LOPO, sec.S2_historical)
     v1s = s1[s1["sample"] != "10x"].set_index("sample")
-    assert np.allclose(sec.set_index("sample").rho_S2_PDAC_LOPO, v1s.rho.loc[sec["sample"]])  # v1 的 A9 ρ 与 A10 S2 一致
+    assert np.allclose(sec.set_index("sample").rho_S2_PDAC_LOPO, v1s.rho.loc[sec["sample"]])  # v1 A9 ρ equals A10 S2
     sec = sec.drop(columns=["n_regions_A12", "S2_historical"]).rename(columns={"S0_128": "rho_S0_A12_128", "S1_128": "rho_S1_A12_128"})
     sec = sec.merge(s15[["sample", "S0_orig", "S0_norm", "S1_norm", "S1_orig"]], on="sample", how="left")
     pub = sec.S0_orig.notna()
@@ -149,14 +149,14 @@ def main():
     sec["um_scale_factor"] = np.where(geo, K, 1.0)
     sec["um_per_px"] = sec.um_per_px_legacy * sec.um_scale_factor
     sec["A12_field_true_um"] = np.where(geo, 128 * K, 128.0)
-    for sid, mpp in [("GSM6505134", 0.220), ("GSM8452849", 0.362), ("D1", 0.362)]:     # Figure 2d 图注数值
+    for sid, mpp in [("GSM6505134", 0.220), ("GSM8452849", 0.362), ("D1", 0.362)]:     # values in the Figure 2d legend
         assert round(float(sec.loc[sec["sample"] == sid, "um_per_px"].iloc[0]), 3) == mpp, sid
     sec["figure_use"] = sec["sample"].map(FIG_USE).fillna("Fig 2e, 3b/e (summary)")
     if (A16 / "COMPLETE").exists():
         s16 = read(A16 / "slide_rho.tsv")
         keep = [c for c in ["S0_true112", "S0_true128", "S1_true112", "S1_true128"] if c in s16]
         sec = sec.merge(s16[["sample"] + keep].rename(columns={c: f"rho_{c}_A16" for c in keep}), on="sample", how="left")
-    # 独立 10x
+    # Independent 10x section
     t = s1[s1["sample"] == "10x"].iloc[0]
     tenx = dict(sample="10x", patient="10x_independent", source="10x public", tissue="PDAC", site=None, preservation=None,
                 technology=t.technology, treatment_recorded=t.treatment_recorded, n_image_tiles=t.n_image_tiles, um_per_px_legacy=t.um_per_px,
@@ -178,7 +178,7 @@ def main():
     add("S6_10x_models", "Independent 10x Visium HD section: all models", read(HE / "A6/spatial_10x.tsv"), "Supp Fig (transfer limits) b",
         "results/he/A6/spatial_10x.tsv", "Adding PDAC Visium HD supervision lowered accuracy here (bulk 0.50 → mixed 0.29).")
 
-    # ---- S7：患者层面与检验
+    # ---- S7: patient level and tests
     p10 = read(A10 / "patient_rho.tsv").rename(columns={"S0": "rho_S0_bulk", "S1": "rho_S1_pancancer", "S2": "rho_S2_PDAC_LOPO"})
     p12 = read(A12 / "patient_rho.tsv")[["patient", "S0_128", "S1_128"]].rename(columns={"S0_128": "rho_S0_A12_128", "S1_128": "rho_S1_A12_128"})
     p15 = read(A15 / "patient_rho.tsv")[["patient", "S0_norm", "S1_norm"]].rename(columns={"S0_norm": "rho_S0_A15_stainnorm", "S1_norm": "rho_S1_A15_stainnorm"})
@@ -241,7 +241,7 @@ def main():
         "A10–A16 are amendments added after A9 failed its section-level criterion, each frozen before it was run; "
         "A14 and A15 were added post hoc. A16 rows appear once that run is complete.")
 
-    # ---- S8：A17（探索性，2026-10-28 用户要求；Figure 4e 图注与 4g）
+    # ---- S8: A17 (exploratory; survival legend and D1 neighbourhood)
     if (A17 / "correlations.tsv").exists():
         add("S8_A17_cptac_summary", "TCGA vs CPTAC: follow-up, power and heterogeneity (A17 part 1)", read(A17 / "part1_summary.tsv"), "Fig 4e legend",
             "results/he/A17/2026-10-28_run01/part1_summary.tsv",
@@ -256,7 +256,7 @@ def main():
         add("S8_A17_D1_regions", "D1 neighbourhood: all 150-µm regions (A17 part 2)", reg, "Fig 4g", "results/he/A17/2026-10-28_run01/regions.tsv",
             "Region key = ix × 1,000,000 + iy (150-µm grid in D1 full-resolution pixels). rel and caf_rich identical to A10. Cell types from the existing user annotation.")
 
-    # ---- 写出
+    # ---- Write out
     pd.DataFrame(SOURCES.values()).to_csv(OUT / "input_manifest.tsv", sep="\t", index=False)
     index = pd.DataFrame([{k: s[k] for k in ["sheet", "title", "figure", "n_rows", "source", "note"]} for s in SHEETS])
     index.to_csv(OUT / "README_index.tsv", sep="\t", index=False)

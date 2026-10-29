@@ -1,10 +1,10 @@
-"""Figure 3 补图：为 D1 重现 A9 留一患者（S2）模型并导出 150 µm 区域预测（hemorph 环境，低负载，在 he/ 内运行）。
+"""Figure 3 supplement: reproduce the A9 leave-one-patient-out (S2) model for D1 and export 150 µm region predictions (hemorph environment, low load, run inside he/).
 
-A9 历史结果只存了 D1 的汇总 ρ（0.749），没有区域预测；T1 只为公开样本做过同样的重现。
-做法与 T1（he_20 public 阶段）完全相同：只读 A9/models 的 feature_stats 与 3 个预训练权重，
-微调集合 = 66 个公开 PDAC 样本 + 其余 3 个自有 HD（不含 D1），种子 A.SEED+1200+k，FT_EPOCHS / BATCH / LR 不变；
-D1 评估 = he_14.eval_own 口径（全部图块局部输出 → 150 µm 网格 → caf_rich 区域 Spearman）。
-验收：与 A9/lopo_spatial.tsv 的 D1 ρ 相差 ≤ 0.03（T1 规则）。不运行 he_17 main，不改任何冻结结果。
+The archived A9 results only stored the summary ρ for D1 (0.749), not region predictions; T1 reproduced this only for public samples.
+Method identical to T1 (he_20 public stage): read only the A9/models feature_stats and the 3 pretrained weights,
+fine-tuning set = 66 public PDAC samples + the other 3 PDAC Visium HD sections (D1 excluded), seeds A.SEED+1200+k, FT_EPOCHS / BATCH / LR unchanged;
+D1 evaluation as he_14.eval_own (all tile local outputs → 150 µm grid → Spearman in caf_rich regions).
+Acceptance: D1 ρ within 0.03 of A9/lopo_spatial.tsv (T1 rule). he_17 main is not run; no fixed result is changed.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def main():
     protected = [A.HE / "A9/models/feature_stats.pt"] + sorted((A.HE / "A9/models").glob("pretrain_seed*.pt"))
     (OUT / "protected_before.json").write_text(json.dumps({str(p): T1.sha(p) for p in protected}, indent=2))
 
-    # 微调集合：与 he_20 public 阶段相同的 66 个公开样本 + 除 D1 外的自有 HD
+    # Fine-tuning set: the same 66 public samples as the he_20 public stage + the PDAC Visium HD sections other than D1
     pdac = []
     hest_root = Path(yaml.safe_load((T1.ROOT / "config/fig1.yaml").read_text())["he_amendments"]
                      ["A12_a10_patch_scale_robustness"]["paths"]["hest_root"])
@@ -72,7 +72,7 @@ def main():
             torch.save(m.state_dict(), f)
         models.append(m)
 
-    # D1 评估：全部图块 → 150 µm 网格（he_14.eval_own / he_10.region_eval 口径）
+    # D1 evaluation: all tiles → 150 µm grid (as he_14.eval_own / he_10.region_eval)
     z = hd[SID]
     L = T1.local(models, z["X"], mu, sd)
     tp = pd.DataFrame({"A9_LOPO__p": L[:, 0], "A9_LOPO__c": L[:, 1]})

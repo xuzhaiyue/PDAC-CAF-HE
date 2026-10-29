@@ -1,12 +1,12 @@
-"""Fig 1 step 05 — 提炼 CTHRC1+ CAF 程序与泛 CAF 参考程序（hemorph 环境）。
+"""Fig 1 step 05 — derive the CTHRC1+ CAF programme and the pan-CAF reference (hemorph environment).
 
-规则全部来自 config/fig1.yaml 的 signature 段，在接触任何预后数据之前冻结：
-  1. 状态差异：每个数据集内，按患者做伪 bulk（CTHRC1+ 亚群 vs 其他 CAF），患者配对 log2FC，
-     三个数据集都需满足 log2FC / FDR / 患者一致性阈值。
-  2. 细胞特异性：用本研究的全局谱系注释重算伪 bulk，基因在成纤维细胞中需显著高于非间质谱系与周细胞/平滑肌，
-     三个数据集都需满足 —— 保证程序在 bulk RNA-seq / Visium HD 中主要反映 CAF。
-  3. 泛 CAF 参考：成纤维细胞特异、但在 CAF 亚群之间差异小的高表达基因（相对状态评分的分母）。
-  4. 留一数据集：用两个数据集提炼，在第三个中检验（细胞水平 AUROC、患者水平评分差异、基因重合度）。
+All rules come from the signature section of config/fig1.yaml and were fixed before any prognostic data were touched:
+  1. State difference: within each dataset, patient pseudo-bulks (CTHRC1+ cluster vs other CAFs), patient-paired log2FC;
+     all three datasets must pass the log2FC / FDR / patient-consistency thresholds.
+  2. Cell specificity: pseudo-bulks recomputed with the study lineage annotation; genes must be clearly higher in fibroblasts than in non-mesenchymal lineages and pericytes/smooth muscle
+     in all three datasets — so that the programme mainly reflects CAFs in bulk RNA-seq / Visium HD.
+  3. Pan-CAF reference: fibroblast-specific, highly expressed genes with small differences between CAF clusters (denominator of the relative score).
+  4. Leave-one-dataset-out: derive on two datasets, test on the third (cell-level AUROC, patient-level score difference, gene overlap).
 
 Outputs: results/fig1/signature/
   de_per_dataset.tsv, lineage_cpm.tsv, specificity.tsv,

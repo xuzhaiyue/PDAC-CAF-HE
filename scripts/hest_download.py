@@ -1,12 +1,12 @@
-"""下载 HEST-1k 人类癌症子集到共享位置（用户 2026-10-21 同意，约 93 GB；供多个课题共用）。hemorph 环境。
+"""Download the human cancer subset of HEST-1k to a shared location (~93 GB). hemorph environment.
 
-选择：HEST v1.3.0 中 Homo sapiens、癌症、非 Xenium、技术为 Visium / Visium HD / Visium HD 3'、
-      器官不为脑 / 眼 / 淋巴结 → 163 个样本（含 5 个胰腺癌）。
-内容：每个样本的 patches/{id}.h5（224 px、0.5 µm/px 斑点图块）、st/{id}.h5ad（空间表达）、metadata/{id}.json，
-      以及根目录的 HEST_v1_3_0.csv。不下载全切片（wsis/）。
-布局：与 HEST 仓库一致（hf_hub_download 的 local_dir），可直接被 HEST 官方工具读取。
-清单：_manifest/selection.tsv（样本列表与选择依据）、_manifest/download_log.tsv（每个文件的大小、sha256、时间）、README.md
-可反复运行：已存在且大小正确的文件跳过。
+Selection: HEST v1.3.0, Homo sapiens, cancer, non-Xenium, technology Visium / Visium HD / Visium HD 3',
+      organ not brain / eye / lymph node → 163 samples (5 pancreatic cancers).
+Content: patches/{id}.h5 (224 px, 0.5 µm/px spot tiles), st/{id}.h5ad (spatial expression), metadata/{id}.json per sample,
+      plus HEST_v1_3_0.csv at the root. Whole slides (wsis/) are not downloaded.
+Layout: as in the HEST repository (local_dir of hf_hub_download), readable directly by the official HEST tools.
+Manifest: _manifest/selection.tsv (sample list and selection basis), _manifest/download_log.tsv (size, sha256 and time per file), README.md
+Re-runnable: existing files with the correct size are skipped.
 """
 from __future__ import annotations
 

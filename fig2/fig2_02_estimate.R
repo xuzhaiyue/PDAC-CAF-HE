@@ -1,5 +1,5 @@
-# ESTIMATE 基质 / 免疫评分（R estimate 包）。RNA-seq 只用 StromalScore / ImmuneScore；
-# ESTIMATE 的纯度公式是为 Affymetrix 芯片拟合的，不适用于 RNA-seq，故不计算纯度（与预设计划的偏差，已记录）。
+# ESTIMATE stromal / immune scores (R estimate package). For RNA-seq only StromalScore / ImmuneScore are used;
+# the ESTIMATE purity formula was fitted for Affymetrix arrays and does not apply to RNA-seq, so purity is not computed (recorded deviation from plan).
 suppressMessages(library(estimate))
 out <- "results/fig2"
 for (cohort in c("tcga", "cptac")) {

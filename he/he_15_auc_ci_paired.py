@@ -1,11 +1,11 @@
-"""病人层面 AUC / Spearman 的 bootstrap 置信区间与配对比较（hemorph 环境）。描述性补充分析，不改变任何冻结的结论。
+"""Bootstrap CIs and paired comparisons of patient-level AUC / Spearman (hemorph environment). Descriptive; does not change any fixed conclusion.
 
-模型（CPTAC 外部预测；TCGA 为折外预测，只有 A1 / A2 / 泛癌模型）：
-  pancancer_finetuned_all8（A8 补做）、pancancer_zero_shot（A8）、A2 I1、A2 B2、A1 岭回归（自提特征）
-标签：A1 定义（基因 z 均值；残差 / 减法），CPTAC 用自身的基因统计量。
-方法：同一组 2000 次病人重抽样，算各模型 AUC 与 Spearman 的 95% CI，以及与 pancancer_finetuned_all8 的配对差值 CI；
-      AUC 另做 DeLong 配对检验。
-输出：results/he/A8/ci_paired.tsv
+Models (CPTAC external predictions; TCGA out-of-fold, A1 / A2 / pan-cancer models only):
+  pancancer_finetuned_all8 (A8), pancancer_zero_shot (A8), A2 I1, A2 B2, A1 ridge (self-extracted features)
+Labels: A1 definition (gene z mean; residual / subtraction); CPTAC uses its own gene statistics.
+Method: one set of 2000 patient resamples; 95% CIs of AUC and Spearman per model and CIs of paired differences against pancancer_finetuned_all8;
+      DeLong paired test for AUC.
+Output: results/he/A8/ci_paired.tsv
 """
 from __future__ import annotations
 

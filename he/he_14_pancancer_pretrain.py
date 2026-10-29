@@ -1,10 +1,10 @@
-"""修订 A8：泛癌空间数据预训练 CAF 状态读取模型 → 胰腺癌零样本 / 微调测试 → 病人层面（hemorph 环境，MPS，低负载）。
-规则见 config/fig1.yaml 的 A8（已冻结）。
+"""Amendment A8: pan-cancer spatial pretraining of the CAF-state readout → PDAC zero-shot / fine-tuning → patient level (hemorph environment, MPS, low load).
+Rules in A8 of config/fig1.yaml (fixed).
 
-区域：每个斑点 + 半径 1.1 × 最近邻距离内的斑点；区域预测 = a·log(mean 局部输出) + b（程序、泛 CAF 两个头），状态 = 两头之差。
-标签：区域伪 bulk 的 log1p CP10k(程序 / 泛 CAF)，样本内 z 标准化；有效区域：总 UMI ≥ 500；评估只看富含 CAF 区域。
-输出：results/he/A8/{qc.tsv, within_pretrain.tsv, pdac.tsv, learning_curve.tsv, resolution.tsv, patient_preds.tsv, patient_level.tsv}
-用法：python he_14_pancancer_pretrain.py [--quick]
+Region: each spot + spots within 1.1 × nearest-neighbour distance; region prediction = a·log(mean local output) + b (programme and pan-CAF heads), state = difference of the heads.
+Labels: log1p CP10k (programme / pan-CAF) of region pseudo-bulks, z-scored within sample; valid regions: total UMI >= 500; evaluation in CAF-rich regions only.
+Outputs: results/he/A8/{qc.tsv, within_pretrain.tsv, pdac.tsv, learning_curve.tsv, resolution.tsv, patient_preds.tsv, patient_level.tsv}
+Usage: python he_14_pancancer_pretrain.py [--quick]
 """
 from __future__ import annotations
 

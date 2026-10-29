@@ -1,10 +1,10 @@
-"""Fig 1 step 01 — 构建输入（hemorph 环境）。
+"""Fig 1 step 01 — build inputs (hemorph environment).
 
 Outputs (results/fig1/):
-  fibro_raw.h5ad          所有成纤维细胞类细胞（原始计数，基因取三数据集交集）
-                          obs: dataset, patient_key, condition, author_label, in_cap（每患者抽样上限内）
-  lineage_pseudobulk.h5ad 各数据集 × 作者谱系 × 患者 的原始计数求和（检验程序是否只在 CAF 中高）
-  inputs_summary.tsv      每个数据集 / 条件 / 谱系的细胞数与患者数
+  fibro_raw.h5ad          all fibroblast-like cells (raw counts, genes intersected across the three datasets)
+                          obs: dataset, patient_key, condition, author_label, in_cap (within the per-patient subsampling cap)
+  lineage_pseudobulk.h5ad summed raw counts per dataset × author lineage × patient (tests whether the programme is high only in CAFs)
+  inputs_summary.tsv      cell and patient numbers per dataset / condition / lineage
 """
 from __future__ import annotations
 

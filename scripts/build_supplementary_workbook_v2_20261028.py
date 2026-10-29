@@ -1,5 +1,5 @@
-"""T4 补充表 v2：把 prepare 脚本写出的 TSV 汇成一个 xlsx（首页 README + 每表一个 sheet），再用 openpyxl 回读逐格核对。
-scRNA 环境（xlsxwriter 写、openpyxl 读）；nice 19。
+"""Supplementary tables v2: combine the TSVs written by the prepare script into one xlsx (README sheet + one sheet per table), then read back with openpyxl and check every cell.
+scRNA environment (xlsxwriter to write, openpyxl to read); nice 19.
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ CONVENTIONS = [
 def main():
     if os.getpriority(os.PRIO_PROCESS, 0) < 19:
         os.nice(19 - os.getpriority(os.PRIO_PROCESS, 0))
-    assert not XLSX.exists(), "不覆盖已有结果"
+    assert not XLSX.exists(), "do not overwrite existing results"
     index = pd.read_csv(OUT / "README_index.tsv", sep="\t")
     sheets = json.loads((OUT / "sheets.json").read_text()); assert sheets == index.sheet.tolist()
     tables = {s: pd.read_csv(OUT / f"{s}.tsv", sep="\t", keep_default_na=True) for s in sheets}
@@ -67,7 +67,7 @@ def main():
                 w.set_column(j, j, width, body)
             w.set_row(0, 30); w.freeze_panes(1, 1); w.autofilter(0, 0, max(len(df), 1), len(df.columns) - 1)
 
-    # ---- 回读逐格核对
+    # ---- Read back and check every cell
     book = openpyxl.load_workbook(XLSX, read_only=True, data_only=True)
     assert book.sheetnames == ["README"] + sheets
     n_cells, errors = 0, []

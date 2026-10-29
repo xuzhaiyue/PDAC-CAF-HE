@@ -624,17 +624,17 @@ class Runner:
         atomic_json(self.out / "protected_verification.json", {"time": now(), "all_unchanged": True, "sha256": self.cfg["protected_sha256"]})
         write_figures(self.out, diff_table, pd.DataFrame(self.coverage))
         report = self.out / "RESULTS.md"
-        lines = ["# A13完成结果", "", "125个预定拟合完成，规则与所有模型参数未按结果修改。", "",
-                 f"主要共同可估患者：{n}/25。undefined保留在逐切片和患者表，不补0。", ""]
+        lines = ["# A13 results", "", "All 125 planned fits completed; rules and model parameters were not changed after seeing results.", "",
+                 f"Primary jointly estimable patients: {n}/25. Undefined values are kept in the section and patient tables, not set to 0.", ""]
         for x in contrast_rows:
-            lines.append(f"- {x['contrast']}：Δρ均值={x['delta_mean']}，95%CI=[{x['ci_low']}, {x['ci_high']}]，p={x['p_two_sided']}；确认性通过={x['passed']}。")
-        lines.extend(["", "比较C采用三个单模型相关性均值，未集成预测。A仅训练损失使用局部RNA深度；测试局部预测不读RNA。", "",
-            "主要结论以完整25患者及B−C→B−A层级为准；阴性/不可估不启动追加实验。来源差异、参考头及T≥100结果见secondary_strata.tsv。", "",
-            "误差和患者CI基于固定LOPO预测，不包含全部初始化/重训练不确定性；不宣称纯CAF状态、因果机制、临床适用或完全未见来源泛化。"])
+            lines.append(f"- {x['contrast']}: mean Δρ={x['delta_mean']}, 95% CI=[{x['ci_low']}, {x['ci_high']}], p={x['p_two_sided']}; confirmatory pass={x['passed']}.")
+        lines.extend(["", "Arm C uses the mean of three single-model correlations, not an ensemble prediction. Arm A uses local RNA depth only in the training loss; local test predictions do not read RNA.", "",
+            "The primary conclusion rests on all 25 patients and the B−C → B−A hierarchy; negative or non-estimable results do not trigger additional experiments. Source differences, the reference head and T>=100 results are in secondary_strata.tsv.", "",
+            "Errors and patient CIs are based on fixed LOPO predictions and do not include full initialisation/retraining uncertainty; no claim is made about pure CAF state, causal mechanism, clinical use or generalisation to entirely unseen sources."])
         report.write_text("\n".join(lines), encoding="utf-8")
         worklog = self.root / self.cfg["paths"]["completion_report"]
         if not worklog.exists():
-            worklog.write_text("# A13执行完成\n\n"+"\n".join(lines[2:])+f"\n\n完整产物：{self.out}。\n", encoding="utf-8")
+            worklog.write_text("# A13 completed\n\n"+"\n".join(lines[2:])+f"\n\nFull outputs: {self.out}.\n", encoding="utf-8")
 
 
 def patient_metrics(metrics):

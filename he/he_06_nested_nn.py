@@ -1,14 +1,14 @@
-"""修订 A2：I1（加和式解耦）与 B2（注意力 MIL）同等预算的嵌套调参（hemorph 环境，MPS）。
-规则见 config/fig1.yaml 的 he_amendments.A2（已冻结）；特征按 A3 用自己提取的 TCGA 全切片特征，CPTAC 为 Mahmood 特征。
+"""Amendment A2: nested tuning with equal budgets for I1 (additive decoupling) and B2 (attention MIL) (hemorph environment, MPS).
+Rules in he_amendments.A2 of config/fig1.yaml (fixed); TCGA features self-extracted per A3, CPTAC pre-extracted.
 
-标签与 A1 相同（基因在训练折内 z 标准化后取平均；状态 = 残差 / 减法）。
-I1：5 个头拟合各基因集得分（program、Moffitt、Dominguez、StRoMA 3 基因、泛 CAF），
-    预测状态 = 头_基因集 − 头_泛CAF（减法），或 头_基因集 − β·头_泛CAF（残差，β 取训练标签的回归系数）。
-B2：直接回归 A1 的全部 11 个目标。
-网格：lr {1e-4, 3e-4, 1e-3} × weight_decay {1e-4, 1e-2} × 轮数 {20, 40, 80}（同一次训练的检查点）。
-外层：5 折（第一轮 rep 0 的折）；每个外层训练集内 3 折选参，标准 = 内层 program_resid 的 Spearman ρ。
-CPTAC：全部 TCGA 上用 3 折选参 → 最终配置 5 个种子取均值。
-输出：results/he/A2/{selection.tsv, oof_tcga.tsv, metrics_tcga.tsv, pred_cptac.tsv, metrics_cptac.tsv, loss_curves.tsv}
+Labels as in A1 (gene z-scores fitted in training folds, averaged; state = residual / subtraction).
+I1: 5 heads fit the gene-set scores (program, Moffitt, Dominguez, StRoMA 3-gene, pan-CAF);
+    predicted state = head_geneset − head_panCAF (subtraction) or head_geneset − β·head_panCAF (residual, β = regression coefficient on training labels).
+B2: direct regression of all 11 A1 targets.
+Grid: lr {1e-4, 3e-4, 1e-3} × weight_decay {1e-4, 1e-2} × epochs {20, 40, 80} (checkpoints of the same run).
+Outer: 5 folds (rep 0 folds of round one); 3-fold tuning within each outer training set, criterion = inner Spearman ρ of program_resid.
+CPTAC: 3-fold tuning on all TCGA → final configuration averaged over 5 seeds.
+Outputs: results/he/A2/{selection.tsv, oof_tcga.tsv, metrics_tcga.tsv, pred_cptac.tsv, metrics_cptac.tsv, loss_curves.tsv}
 """
 from __future__ import annotations
 

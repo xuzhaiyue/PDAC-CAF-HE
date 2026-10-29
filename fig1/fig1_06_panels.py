@@ -1,14 +1,14 @@
-"""Fig 1 正式面板（pdac_scvi 环境）。每个面板单独导出 PDF（文字可编辑）+ PNG（300 dpi）。
+"""Fig 1 panels (pdac_scvi environment). Each panel exported as PDF (editable text) + PNG (300 dpi).
 
-b  global_umap         全局图谱：成纤维细胞 / 周细胞-平滑肌上色，其余谱系浅灰，谱系名直接标注
-c  caf_umap            CAF 细分：≤3 主色（散点图所有颜色两两可分的上限）+ 灰，亚群名直接标注
-   caf_umap_facets     补充：每个亚群单独一格
-d  score_lineage       CTHRC1+ 程序得分（患者水平均值）在全部谱系中的分布
-e  score_caf_subtype   CTHRC1+ 程序得分在各 CAF 亚群中的分布（按数据集着形状）
-f  contribution        PDAC 组织中各基因转录本来自成纤维细胞的比例（丰度加权）
-g  lodo                留一数据集验证：程序 vs CTHRC1 单基因的 AUROC
+b  global_umap         global atlas: fibroblasts / pericytes-smooth muscle coloured, other lineages light grey, lineage names labelled
+c  caf_umap            CAF subtypes: <= 3 main colours (the limit for pairwise-distinguishable scatter colours) + grey, cluster names labelled
+   caf_umap_facets     supplement: one facet per cluster
+d  score_lineage       CTHRC1+ programme score (patient-level mean) across all lineages
+e  score_caf_subtype   CTHRC1+ programme score across CAF clusters (shape by dataset)
+f  contribution        fraction of each gene's transcripts in PDAC tissue that come from fibroblasts (abundance-weighted)
+g  lodo                leave-one-dataset-out validation: AUROC of the programme vs CTHRC1 alone
 
-配色来自 dataviz 参考调色板（validate_palette.js 校验：前 3 槽在散点图全两两组合下通过）。
+Colours from a validated reference palette (first 3 slots pass all pairwise scatter comparisons).
 """
 from __future__ import annotations
 
@@ -51,8 +51,8 @@ plt.rcParams.update({
 })
 OUTLINE = [patheffects.withStroke(linewidth=1.6, foreground="white")]
 
-CAF_LABEL_OFFSETS: dict = {}       # 看图后按需填写，避免标签重叠
-CAF_ATLAS = "integrate_caf_final"   # 清理后（细胞质控 + 双联体 + 规则化亚群排除）的 CAF 图谱
+CAF_LABEL_OFFSETS: dict = {}       # filled in after inspecting the plot, to avoid label overlap
+CAF_ATLAS = "integrate_caf_final"   # cleaned CAF atlas (cell QC + doublets + rule-based cluster exclusion)
 CAF_NAMES = {"2": "CTHRC1+ matrix myCAF", "1": "HOPX+ F2R+ myCAF", "5": "Glycolytic CAF",
              "0": "C7+ C3+ iCAF", "4": "MFAP5+ IGF1+ iCAF", "3": "PI16+ universal",
              "6": "SPP1+ IBSP+ CAF (8 patients)", "7": "Chemo-associated CAF"}
@@ -218,7 +218,7 @@ def panel_scores(g, a):
 def panel_contribution():
     """Horizontal heatmap (genes on x, datasets on y) so it can share a row with panel g."""
     c = pd.read_csv(ROOT / "signature" / "fibroblast_contribution.tsv", sep="\t")
-    # 与已发表基因集的比较见 fig1_14_published_signatures.py（StRoMA 不作为生物学参照，已移除）
+    # comparison with published gene sets is in fig1_14_published_signatures.py
     groups = [("CTHRC1+ program", PROG["CTHRC1_matrix_CAF"]), ("Pan-CAF ref.", PROG["pan_CAF"])]
     genes = [g for _, gs in groups for g in gs]
     m = c.pivot(index="gene", columns="dataset", values="fib_contribution").reindex(genes).T

@@ -1,10 +1,10 @@
-"""修订 A3：自己从 TCGA-PAAD 全切片提取 UNI2-h 特征（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 he_amendments.A3。
+"""Amendment A3: UNI2-h feature extraction from TCGA-PAAD whole slides (hemorph environment, MPS). Rules in he_amendments.A3 of config/fig1.yaml.
 
-切块与预处理照搬胃癌项目（project_GC_CAF_pathomics/03_analysis/2026-10-06_Figure2_UNI2h_run01/extract_uni2h_embeddings.py）：
-缩略图组织掩膜 → 128 µm 网格 → 组织占比 ≥ 0.5 → 每张切片按 file_id 哈希种子随机取 ≤ 1000 块 → UNI2-h（timm 预处理）。
-只处理下载日志中 md5 已核对的切片；可反复运行（已完成的跳过），下载进行中也可以边下边提。
-输出：results/he/cache_own/tcga/{patient}.npy（float16，图块 × 1536）与 {patient}_coords.npy（x, y, 切片序号），
-      results/he/cache_own/tcga/slides/{file_id}.npz（单张切片特征与坐标），extraction_status.tsv
+Tiling and preprocessing follow an earlier in-house pipeline (extract_uni2h_embeddings.py):
+thumbnail tissue mask → 128 µm grid → tissue fraction >= 0.5 → <= 1000 tiles per slide with a file_id-hash seed → UNI2-h (timm preprocessing).
+Only slides with verified md5 in the download log are processed; re-runnable (completed slides skipped), can run while downloads continue.
+Outputs: results/he/cache_own/tcga/{patient}.npy (float16, tiles × 1536) and {patient}_coords.npy (x, y, slide index),
+      results/he/cache_own/tcga/slides/{file_id}.npz (per-slide features and coordinates), extraction_status.tsv
 """
 from __future__ import annotations
 
@@ -88,7 +88,7 @@ def main():
     have = {r["file_id"] for r in done}
     dl = pd.read_csv(DL, sep="\t")
     dl = dl[dl.status.isin(["downloaded_verified", "verified_existing"]) & ~dl.file_id.isin(have)
-            & (dl.file_name.str[13:15] == "01")]          # 只用原发肿瘤切片（清单里还有 11 = 正常组织切片）
+            & (dl.file_name.str[13:15] == "01")]          # primary tumour slides only (the manifest also has 11 = normal tissue slides)
     print(f"{len(dl)} verified slides to extract on {dev}", flush=True)
     for r in dl.itertuples():
         t0 = time.time()

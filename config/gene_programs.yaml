@@ -1,8 +1,8 @@
-# 预先指定、建模前冻结。探针集中缺失的基因会被自动去掉并记录。
+# Prespecified and fixed before modelling. Genes missing from a probe set are dropped automatically and logged.
 # MPAS: Wagle et al., NPJ Precis Oncol 2018 (MAPK Pathway Activity Score)
 MPAS: [PHLDA1, SPRY2, SPRY4, DUSP4, DUSP6, CCND1, EPHA2, EPHA4, ETV4, ETV5]
 
-# 次要：扩展的 ERK 转录输出（MPAS 基因很稀疏，作为敏感性分析）
+# Secondary: extended ERK transcriptional output (MPAS genes are sparse; sensitivity analysis)
 MAPK_extended: [PHLDA1, SPRY2, SPRY4, DUSP4, DUSP5, DUSP6, CCND1, EPHA2, EPHA4,
                 ETV1, ETV4, ETV5, SPRED1, SPRED2, FOSL1, EGR1, IER3, MYC]
 
@@ -14,10 +14,10 @@ moffitt_classical: [BTNL8, FAM3D, ATAD4, AGR3, CTSE, LYZ, TFF2, TFF1, ANXA10, LG
                     PLA2G10, CEACAM6, VSIG2, TSPAN8, ST6GALNAC1, AGR2, TFF3, CYP3A7,
                     MYO1A, CLRN3, KRT20, CDH17, SPINK4, REG4]
 
-# 混杂因素（作为协变量 / 分层，不作为主要靶标）
+# Confounders (covariates / strata, not primary targets)
 proliferation: [MKI67, TOP2A, CENPF, NUSAP1, BIRC5, CCNB1, UBE2C, PCLAF]
 hypoxia: [VEGFA, SLC2A1, CA9, NDRG1, BNIP3, PGK1, ADM, ANKRD37]
 
-# 用于排除的非恶性上皮
+# Non-malignant epithelium used for exclusion
 acinar: [PRSS1, CPA1, CELA3A, CTRB2, PNLIP, CPB1, CEL, CTRC]
 endocrine: [INS, GCG, SST, PPY, CHGA]

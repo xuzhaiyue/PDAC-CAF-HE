@@ -1,12 +1,12 @@
-"""自有 Visium HD 的图块特征与图块层面实测标签（hemorph 环境，MPS）。
+"""Tile features and tile-level measured labels for the PDAC Visium HD sections (hemorph environment, MPS).
 
-图像：spaceranger 嵌在 cloupe 里的全分辨率 H&E（只读）；mpp 来自 scalefactors_json.json。
-切块：与 TCGA 自提特征相同（A3）：128 µm 网格（从图像原点起算，与 region_index 一致）、缩略图组织掩膜、组织占比 ≥ 0.5，
-      但保留全部组织图块（空间验证需要致密覆盖）；UNI2-h 用 timm 自带预处理。
-注意：A1/D1 约 0.36 µm/px，A2/D2 约 0.68 µm/px，比 TCGA（约 0.25）粗；128 µm 视野一律缩放到 224 px，分辨率差异作为局限报告。
-标签：每个图块内的细胞（只用有细胞核多边形的细胞，同 hd_program_measurability）伪 bulk：程序 / 泛 CAF UMI、
-      非腺泡非内分泌总 UMI、细胞数。区域层面（150 / 100 µm）的标签在评估脚本里由细胞重新汇总。
-输出：results/he/hd/{sample}.npz（features, ix, iy, x_px, y_px, mpp, prog_umi, pan_umi, total_umi, n_cells）
+Image: full-resolution H&E embedded by spaceranger in the cloupe file (read only); mpp from scalefactors_json.json.
+Tiling as for the self-extracted TCGA features (A3): 128 µm grid (from the image origin, consistent with region_index), thumbnail tissue mask, tissue fraction >= 0.5,
+      but all tissue tiles are kept (spatial validation needs dense coverage); UNI2-h with timm preprocessing.
+Note: A1/D1 ~0.36 µm/px and A2/D2 ~0.68 µm/px are coarser than TCGA (~0.25); every 128 µm field is resized to 224 px; resolution differences are reported as a limitation.
+Labels: pseudo-bulk of cells within each tile (cells with nucleus polygons only): programme / pan-CAF UMI,
+      non-acinar non-endocrine total UMI, cell count. Region-level (150 / 100 µm) labels are re-aggregated from cells in the evaluation scripts.
+Output: results/he/hd/{sample}.npz (features, ix, iy, x_px, y_px, mpp, prog_umi, pan_umi, total_umi, n_cells)
 """
 from __future__ import annotations
 

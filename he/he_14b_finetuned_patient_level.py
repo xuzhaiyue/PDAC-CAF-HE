@@ -1,4 +1,4 @@
-# A8 补做（规则已含，原脚本漏做；第二次运行起保存逐病人预测，用于置信区间与配对检验）：泛癌预训练 + 全部 8 个胰腺癌样本微调后的模型，在 TCGA / CPTAC 病人层面的 Spearman 与 AUC
+# A8 completion (included in the rules; saves per-patient predictions for CIs and paired tests): Spearman and AUC at TCGA / CPTAC patient level for the pan-cancer pretrained model fine-tuned on all 8 PDAC samples
 import os, sys, numpy as np, pandas as pd, torch
 from scipy import stats
 from sklearn.metrics import roc_auc_score

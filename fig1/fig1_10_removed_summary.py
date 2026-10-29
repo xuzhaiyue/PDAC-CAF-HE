@@ -1,13 +1,13 @@
-"""Fig 1 补充表 — 从间质细胞到最终 CAF 图谱，每一步去掉了哪些细胞、为什么（hemorph 环境）。
+"""Fig 1 supplementary table — which cells were removed at each step from mesenchymal cells to the final CAF atlas, and why (hemorph environment).
 
 Steps
-  1. 细胞质控（全部间质细胞）：qc/removed_cells.tsv.gz（低基因数 / 低 UMI / 高线粒体 / 双联体）
-  2. 抽样：每患者×条件 ≤ max_cells_per_patient（未入选的细胞不计为"去除"）
-  3. 亚群排除：各轮整合目录中的 cluster_flags.tsv（规则见 config.cluster_exclusion）
+  1. Cell QC (all mesenchymal cells): qc/removed_cells.tsv.gz (low gene count / low UMI / high mitochondrial / doublet)
+  2. Subsampling: <= max_cells_per_patient per patient × condition (cells not selected are not counted as removed)
+  3. Cluster exclusion: cluster_flags.tsv in each integration round (rules in config.cluster_exclusion)
 
 Outputs: results/fig1/qc/
-  removal_by_step.tsv     每一步 × 数据集 × 原因 的细胞数
-  removed_cells_all.tsv.gz  每个被去除细胞的去除步骤和原因
+  removal_by_step.tsv     cell counts per step × dataset × reason
+  removed_cells_all.tsv.gz  removal step and reason for every removed cell
 """
 from __future__ import annotations
 

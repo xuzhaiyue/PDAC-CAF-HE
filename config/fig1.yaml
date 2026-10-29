@@ -1,5 +1,5 @@
-# Figure 1 — 整合 PDAC 单细胞数据，定义 CTHRC1+ CAF 程序
-# 原始数据只读引用自 PanIN 项目，不复制。
+# Figure 1 — integrate PDAC single-cell data and define the CTHRC1+ CAF programme
+# Raw data are referenced read-only from another project and never copied.
 
 paths:
   panin: /Users/Zhaiyue/PanIN
@@ -20,23 +20,23 @@ datasets:
     patient_col: patient_id
     condition_col: condition       # Naive / Chemo
     condition_map: {Naive: PDAC_naive, Chemo: PDAC_chemo}
-  GSE278688:                       # scRNA; 作者粗注释 all_celltype
+  GSE278688:                       # scRNA; authors' coarse annotation all_celltype
     mtx_dir: 01_raw/GSE278688_family
     prefix: GSE278688_sc_
     lineage_col: all_celltype
-    fibro_labels: [CAF, Stellate]  # 星状细胞可能混有静止 PSC / 周细胞，整合后再按标志基因剔除
+    fibro_labels: [CAF, Stellate]  # stellate cells may include quiescent PSCs / pericytes; removed by markers after integration
     patient_col: patients
     condition_col: tissue
-    # 治疗状态 GEO 元数据未写明，暂记为 PDAC_unknown_tx（论文中确认后再改）
+    # Treatment status is not stated in the GEO metadata; recorded as PDAC_unknown_tx
     condition_map: {Tumor: PDAC_unknown_tx, Adjacent_normal: adjacent_normal}
     default_condition: non_tumor
-    exclude_conditions: [non_tumor]   # PBMC 不进入全局图谱
+    exclude_conditions: [non_tumor]   # PBMC not included in the global atlas
 
-discovery_conditions: [PDAC_naive, PDAC_unknown_tx]   # 定义程序只用这些细胞
-max_cells_per_patient: 500           # CAF 层：每患者×条件上限
-global_max_cells_per_patient: 2000   # 全局图谱：每患者×条件上限
+discovery_conditions: [PDAC_naive, PDAC_unknown_tx]   # only these cells are used to define the programme
+max_cells_per_patient: 500           # CAF layer: cap per patient × condition
+global_max_cells_per_patient: 2000   # global atlas: cap per patient × condition
 
-# 全局大类注释（Fig 1b）：按经典标志基因
+# Global lineage annotation (Fig 1b) by classical markers
 lineage_markers:
   Ductal_tumor: [EPCAM, KRT19, KRT8, KRT18, KRT7, MUC1]
   Acinar: [PRSS1, CPA1, CELA3A, CTRB2]
@@ -54,45 +54,45 @@ lineage_markers:
   Cycling: [MKI67, TOP2A]
 random_seed: 20261018
 
-# 用于识别非 CAF 污染（整合后检查亚群）
+# Used to identify non-CAF contamination (clusters checked after integration)
 contaminant_markers:
   pericyte: [RGS5, KCNJ8, NOTCH3, MCAM, HIGD1B]
   smooth_muscle: [MYH11, DES, CNN1, ACTG2]
   epithelial: [EPCAM, KRT19, KRT8, KRT18]
   immune: [PTPRC, CD74, LYZ]
-  endothelial: [VWF, CDH5, PLVAP]   # PECAM1 不在三数据集交集中
+  endothelial: [VWF, CDH5, PLVAP]   # PECAM1 is not in the three-dataset intersection
   acinar: [PRSS1, CPA1, CELA3A]
 
-# 已知 CAF 分型参考（用于注释，不用于定义程序）
+# Known CAF subtype references (for annotation only, not for defining the programme)
 caf_reference:
   myCAF: [ACTA2, TAGLN, MYL9, TPM2, MMP11, POSTN, COL10A1, CTHRC1]
   iCAF: [IL6, CXCL12, PDGFRA, CFD, DPT, C3, LMNA, HAS1]
   apCAF: [CD74, HLA-DRA, HLA-DRB1, SLPI, SAA3, KRT19]
   pan_CAF: [COL1A1, COL1A2, COL3A1, DCN, LUM, PDGFRB, FAP, SPARC]
 
-# 全局亚群（integrate_global, leiden_0.5）人工核对后的修正；依据见 results/fig1/annotate_global/cluster_annotation.tsv
+# Manual corrections of global clusters (integrate_global, leiden_0.5); basis in results/fig1/annotate_global/cluster_annotation.tsv
 global_annotation_overrides:
   "1": Neutrophil_RBC      # HBB, S100A8/9, G0S2
   "11": Ductal_normal      # CFTR, SLC4A4, FXYD2, CLDN10
-  "6": Low_quality         # 线粒体基因 + HBB + KRT19 + COL1A1；96% 来自 GSE205013
+  "6": Low_quality         # mitochondrial genes + HBB + KRT19 + COL1A1; 96% from GSE205013
   "4": Pericyte_SMC        # ACTA2, TAGLN, MYL9, PDGFRB, RGS5
   "20": pDC                # LILRA4, IRF7, GZMB
   "21": Tuft               # SH2D6, LRMP, HEPACAM2
-  "24": Hepatocyte_like    # ALB, FGB, ORM1（污染）
-  "17": Ambiguous          # 13 个细胞，上皮混合
+  "24": Hepatocyte_like    # ALB, FGB, ORM1 (contamination)
+  "17": Ambiguous          # 13 cells, epithelial mixture
 
-# CTHRC1+ 程序提炼（fig1_05）；在接触任何预后数据之前冻结
+# CTHRC1+ programme derivation (fig1_05); fixed before any prognostic data were touched
 signature:
   caf_h5ad: integrate_caf_v2/fibro_integrated.h5ad
   cluster_key: leiden_0.5
   target_clusters: ["6"]            # CTHRC1+ matrix myCAF
-  exclude_from_reference: ["3", "8"]  # ADIRF+ / low-complexity，GSE278688 偏倚
-  min_cells_per_group: 10           # 每患者每组最少细胞数
-  min_log2fc: 1.0                   # 每个数据集的平均 log2FC
+  exclude_from_reference: ["3", "8"]  # ADIRF+ / low-complexity, GSE278688 bias
+  min_cells_per_group: 10           # minimum cells per patient per group
+  min_log2fc: 1.0                   # mean log2FC per dataset
   max_fdr: 0.05
   min_frac_patients_up: 0.8
-  min_target_cpm: 10                # 目标亚群伪 bulk 中的最低表达
-  specificity_vs_nonmesenchymal: 3.0  # 成纤维细胞 / 任何非间质谱系 的最小倍数
+  min_target_cpm: 10                # minimum expression in the target-cluster pseudo-bulk
+  specificity_vs_nonmesenchymal: 3.0  # minimum fold of fibroblasts over any non-mesenchymal lineage
   specificity_vs_pericyte: 2.0
   max_genes: 30
   pancaf_max_abs_log2fc: 0.5
@@ -100,143 +100,143 @@ signature:
   nonmesenchymal_lineages: [Ductal_tumor, Ductal_normal, Acinar, Endocrine, Endothelial, T_NK, B, Plasma,
                             Myeloid, Mast, Schwann, Neutrophil_RBC, pDC, Tuft]
 
-# 2026-10-18 规则修订 v2（在接触任何预后数据之前；原规则见上方 signature 段）
-# 原规则下 0 个基因通过。诊断：
-#   (1) 每个数据集内 FDR<0.05：配对患者仅 13/9/9，GSE205013 无一基因过 FDR，但效应量大且三数据集一致 → 功效不足；
-#   (2) 特异性取"任一非间质谱系最大值"：被施万细胞、簇细胞、pDC 等稀有谱系卡住，而它们对 bulk 几乎无贡献。
-# 修订：效应量与患者一致性按数据集要求；显著性合并全部配对患者检验；特异性改为丰度加权的成纤维细胞贡献比例。
+# 2026-10-18 rule revision v2 (before any prognostic data were touched; original rules in the signature section above)
+# Under the original rules no gene passed. Diagnosis:
+#   (1) FDR<0.05 within each dataset: only 13/9/9 paired patients; no gene passed FDR in GSE205013 although effects were large and consistent across datasets → underpowered;
+#   (2) specificity used the maximum over any non-mesenchymal lineage, so rare lineages (Schwann, tuft, pDC) with almost no bulk contribution blocked genes.
+# Revision: effect size and patient consistency required per dataset; significance tested on all paired patients pooled; specificity replaced by the abundance-weighted fibroblast contribution.
 signature_v2:
-  fdr_scope: pooled_patients        # 合并三数据集配对患者做配对 t 检验后 BH 校正
-  min_fib_contribution: 0.6         # PDAC 样本中该基因转录本来自成纤维细胞的比例（丰度加权），每个数据集都需满足
+  fdr_scope: pooled_patients        # paired t-test on paired patients pooled across the three datasets, then BH correction
+  min_fib_contribution: 0.6         # fraction of the gene's transcripts in PDAC samples from fibroblasts (abundance-weighted), required in every dataset
   contribution_conditions: [PDAC_naive, PDAC_unknown_tx]
-  pancaf_min_fib_cpm: 100           # v2 补充：泛 CAF 基因需在成纤维细胞中 ≥100 CPM（剔除 DIRC1/KCNA1/PPFIA2 这类测不到的基因）
+  pancaf_min_fib_cpm: 100           # v2 addition: pan-CAF genes must be >= 100 CPM in fibroblasts (removes undetectable genes such as DIRC1/KCNA1/PPFIA2)
 
-# 2026-10-19 清理方案（细胞质控 + 双联体 + 规则化的亚群排除）
+# 2026-10-19 cleaning plan (cell QC + doublets + rule-based cluster exclusion)
 cell_qc:
-  mad_k: 3                        # 每个数据集内，log(基因数)/log(UMI) 低于中位数 - 3×MAD 的细胞剔除
+  mad_k: 3                        # within each dataset, cells with log(genes)/log(UMI) below median − 3×MAD are removed
   min_genes: 500
-  max_mt_floor: 10                # 线粒体比例阈值 = max(10%, 中位数 + 3×MAD)
-  remove_predicted_doublets: true # Scrublet（每个 患者×条件 样本、全部细胞上检测）
-cluster_exclusion:                # 间质层与 CAF 层使用同一套规则，反复排除直至无亚群被标记
-  pericyte_smc_mean_frac: 0.4     # RGS5+/NOTCH3+/MYH11+ 阳性率均值（ADIRF+ 0.55；CAF 亚群最高 0.29）
-  low_complexity_ratio: 0.5       # 亚群中位基因数 / 全体中位基因数
+  max_mt_floor: 10                # mitochondrial threshold = max(10%, median + 3×MAD)
+  remove_predicted_doublets: true # Scrublet (per patient × condition sample, on all cells)
+cluster_exclusion:                # same rules for the mesenchymal and CAF layers, repeated until no cluster is flagged
+  pericyte_smc_mean_frac: 0.4     # mean positive fraction of RGS5+/NOTCH3+/MYH11+ (ADIRF+ 0.55; highest CAF cluster 0.29)
+  low_complexity_ratio: 0.5       # cluster median gene count / overall median gene count
   epithelial_score: 0.5
   immune_score: 0.5
 
-# 2026-10-19 清理后图谱（integrate_caf_final = integrate_caf_clean_r2）上重新提炼：
-# 目标 = 新图谱中的 CTHRC1+ 基质型 myCAF（leiden_0.5 的 "2"）；ADIRF+/低复杂度已在清理中去除，对照组 = 其余全部 CAF。
+# 2026-10-19 re-derivation on the cleaned atlas (integrate_caf_final = integrate_caf_clean_r2):
+# target = CTHRC1+ matrix myCAF in the new atlas (leiden_0.5 "2"); ADIRF+/low-complexity removed during cleaning; comparator = all other CAFs.
 signature_v3:
   caf_h5ad: integrate_caf_final/fibro_integrated.h5ad
   target_clusters: ["2"]
   exclude_from_reference: []
 
-# 2026-10-19 v4：排除在自有 Visium HD 上存在技术缺失的基因（方案 B，所有数据统一排除）
-# 依据：玻片 H1-NR4JJFD（A1、D1）上 194 个基因系统性缺失（results/hd_measurability/run_dropout_scan.tsv）；
-# HTRA3 在 A1/D1 中比单细胞最低患者低 20–50 倍，而探针序列与其他玻片相同 → 技术问题。
-# 该排除只用于程序/参考基因的候选池，不改变其他筛选阈值；在接触任何预后数据之前做出。
+# 2026-10-19 v4: exclude genes with technical dropout on the PDAC Visium HD slides (option B, excluded uniformly for all data)
+# Basis: 194 genes systematically missing on slide H1-NR4JJFD (A1, D1) (results/hd_measurability/run_dropout_scan.tsv);
+# HTRA3 in A1/D1 is 20–50-fold lower than the lowest single-cell patient while the probe sequence matches other slides → technical.
+# This exclusion applies only to the candidate pool of programme/reference genes and changes no other threshold; decided before any prognostic data were touched.
 signature_v4:
   exclude_genes: [HTRA3]
 
-# 2026-10-19 外部单细胞验证（在看到任何外部结果之前冻结；fig1_15_external_validation.py）
-# 每个数据集完全独立处理：不与发现集整合，不使用作者注释做主分析（作者标签只做次要对照）。
+# 2026-10-19 external single-cell validation (fixed before seeing any external result; fig1_15_external_validation.py)
+# Each dataset is processed fully independently: no integration with discovery data, author annotations not used in the primary analysis (secondary comparison only).
 external_validation:
   bundle: /Users/Zhaiyue/PanIN/02_intermediate/2026-09-16_six_cohort_input_bundle
   datasets:
-    GSE242230: {modality: scRNA, files: GSE242230_per_sample/*.h5ad, keep_tissue: tumor_primary}   # EUS-FNB 活检
+    GSE242230: {modality: scRNA, files: GSE242230_per_sample/*.h5ad, keep_tissue: tumor_primary}   # EUS-FNB biopsies
     GSE202051: {modality: snRNA, files: standardized/GSE202051.h5ad}                                # Hwang 2022
-    GSE253429: {modality: snRNA, files: GSE253429_per_sample/*.h5ad}                                # 21 例原发 PDAC
+    GSE253429: {modality: snRNA, files: GSE253429_per_sample/*.h5ad}                                # 21 primary PDAC
     GSE291124: {modality: snRNA, files: standardized/GSE291124_per_sample/*.h5ad}
-  cap_per_sample: 2000            # 全局层每样本抽样上限（与发现集一致）；CAF 层用抽样中的全部成纤维细胞
-  qc:                             # 每个数据集内 MAD 规则（同 cell_qc），单核数据线粒体比例天然低
+  cap_per_sample: 2000            # global-layer cap per sample (as in discovery); the CAF layer uses all sampled fibroblasts
+  qc:                             # within-dataset MAD rules (as cell_qc); single-nucleus data have inherently low mitochondrial fractions
     mad_k: 3
     min_genes: {scRNA: 500, snRNA: 300}
     max_mt_floor: {scRNA: 10, snRNA: 5}
-  lineage_min_margin: 0.2         # 亚群最高谱系评分与第二名的差距；snRNA 绝对评分偏低，故不设最低分
+  lineage_min_margin: 0.2         # margin between the top and second lineage score; no minimum score because snRNA absolute scores are low
   caf_resolution: 0.5
-  mapping:                        # 外部亚群 → 发现集亚群：亚群伪 bulk 质心相关（不使用程序基因与泛 CAF 基因）
-    markers_per_subtype: 50       # 发现集各亚群 Wilcoxon 前 50 标志基因的并集
-    min_r: 0.3                    # 最高相关 < 0.3 记为未匹配
+  mapping:                        # external cluster → discovery cluster: correlation of cluster pseudo-bulk centroids (programme and pan-CAF genes not used)
+    markers_per_subtype: 50       # union of the top 50 Wilcoxon markers of each discovery cluster
+    min_r: 0.3                    # top correlation < 0.3 is called unmatched
   presence_min_cafs: 30
   presence_frac: 0.05
-  success:                        # 预设的"验证成立"标准（每个数据集分别判断）
-    mapped_cthrc1: true           # 至少一个外部亚群匹配到 CTHRC1+ matrix myCAF
-    min_auroc: 0.85               # 程序区分匹配亚群与其他 CAF
-    min_genes_up: 7               # 9 个程序基因中，患者配对 log2FC 中位数 > 0 的至少 7 个
-  min_mapped_cells_for_test: 100  # 匹配细胞 < 100 的数据集只做描述
+  success:                        # prespecified validation criteria (judged per dataset)
+    mapped_cthrc1: true           # at least one external cluster matched to CTHRC1+ matrix myCAF
+    min_auroc: 0.85               # programme separates the matched cluster from other CAFs
+    min_genes_up: 7               # at least 7 of the 9 programme genes with median patient-paired log2FC > 0
+  min_mapped_cells_for_test: 100  # datasets with < 100 matched cells are described only
 
-# 2026-10-19 模拟 bulk 拆分检验（运行前冻结；fig1_17_pseudobulk_decoupling.py）
-# 问题：相对状态 = 程序得分 − 泛 CAF 得分（log2CPM 均值之差）能否反映 CTHRC1+ 在 CAF 中的比例，且不受 CAF 多少影响？
-# 理论：bulk 中程序 ≈ CAF占比 × f(CTHRC1+比例)，泛 CAF ≈ CAF占比 × 常数 → 取对数相减后 CAF占比 抵消。
+# 2026-10-19 simulated bulk decoupling test (fixed before running; fig1_17_pseudobulk_decoupling.py)
+# Question: does the relative state = programme score − pan-CAF score (difference of mean log2CPM) reflect the CTHRC1+ fraction of CAFs, independent of CAF amount?
+# Rationale: in bulk, programme ≈ CAF fraction × f(CTHRC1+ fraction) and pan-CAF ≈ CAF fraction × constant → CAF fraction cancels after log subtraction.
 decoupling:
-  natural:                        # A. 真实样本：患者×条件 全部细胞加总为模拟 bulk
-    min_caf_atlas_cells: 30       # 真实 CTHRC1+ 比例取自 CAF 图谱（每样本随机抽样的清理后 CAF）
-  mixtures:                       # B. 受控混合：CAF 占比与 CTHRC1+ 比例按网格正交变化
+  natural:                        # A. real samples: all cells of a patient × condition summed into a pseudo-bulk
+    min_caf_atlas_cells: 30       # true CTHRC1+ fraction from the CAF atlas (randomly sampled cleaned CAFs per sample)
+  mixtures:                       # B. controlled mixtures: CAF fraction and CTHRC1+ fraction varied orthogonally on a grid
     n_cells: 2000
     caf_frac: [0.05, 0.10, 0.20, 0.30, 0.50]
     cthrc1_frac: [0.0, 0.1, 0.2, 0.3, 0.5, 0.7]
     reps: 10
-    conditions: [PDAC_naive, PDAC_unknown_tx, PDAC_chemo]   # 细胞池只取肿瘤样本
-  compare: [program, Moffitt_activated, Dominguez_LRRC15]    # 各自的"原始得分"与"减去泛 CAF 的相对得分"
-  success:                        # 针对本程序的相对得分
-    mixtures_min_rho_state: 0.8   # 与 CTHRC1+ 比例的 Spearman ≥ 0.8（每个数据集）
-    mixtures_max_abs_rho_caf: 0.2 # 与 CAF 占比的 |Spearman| ≤ 0.2（每个数据集）
-    natural_min_rho_state: 0.6    # 真实样本：与 CTHRC1+ 比例的偏 Spearman ≥ 0.6（控制 CAF 占比）
-    natural_max_abs_rho_caf: 0.3  # 真实样本：与 CAF 占比的 |偏 Spearman| ≤ 0.3（控制 CTHRC1+ 比例）
+    conditions: [PDAC_naive, PDAC_unknown_tx, PDAC_chemo]   # cell pools from tumour samples only
+  compare: [program, Moffitt_activated, Dominguez_LRRC15]    # raw score and pan-CAF-subtracted relative score of each
+  success:                        # for the relative score of this programme
+    mixtures_min_rho_state: 0.8   # Spearman with CTHRC1+ fraction >= 0.8 (each dataset)
+    mixtures_max_abs_rho_caf: 0.2 # |Spearman| with CAF fraction <= 0.2 (each dataset)
+    natural_min_rho_state: 0.6    # real samples: partial Spearman with CTHRC1+ fraction >= 0.6 (controlling CAF fraction)
+    natural_max_abs_rho_caf: 0.3  # real samples: |partial Spearman| with CAF fraction <= 0.3 (controlling CTHRC1+ fraction)
 
-# 2026-10-19 v5：面向 bulk 的状态程序设计（草案，待用户确认后冻结；确认前不运行任何选择或评估）
-# 目的：设计"分子（状态基因）/ 分母（参考基因）"使 相对得分 = mean log2CPM(分子) − mean log2CPM(分母)
-#       能估计 CTHRC1+ 占 CAF 的比例，且在低基质样本中也不受 CAF 多少影响。
-# 不成功（任一主要标准未达到）→ 保留原 9 基因程序 + 4 基因泛 CAF（原计划），本次尝试作为阴性结果写进补充材料，不再调整。
+# 2026-10-19 v5: bulk-oriented state programme design (draft; fixed only after confirmation; no selection or evaluation before then)
+# Aim: choose numerator (state genes) / denominator (reference genes) so that relative score = mean log2CPM(numerator) − mean log2CPM(denominator)
+#       estimates the CTHRC1+ fraction of CAFs, independent of CAF amount even in low-stroma samples.
+# If unsuccessful (any primary criterion missed) → keep the original 9-gene programme + 4-gene pan-CAF reference; this attempt is reported as a negative result, no further tuning.
 program_v5:
   status: draft_pending_user_approval
-  training_datasets: [CRA001160, GSE205013, GSE278688]   # 只用发现集；外部 4 个数据集只用于最终独立评估
+  training_datasets: [CRA001160, GSE205013, GSE278688]   # discovery datasets only; the 4 external datasets are used only for the final independent evaluation
   training_conditions: [PDAC_naive, PDAC_unknown_tx]
   candidates:
-    platform:                     # 两个基因池共同的平台约束
+    platform:                     # platform constraints shared by both gene pools
       in_visiumhd_probe_set: true
-      exclude_slide_dropout: true # run_dropout_scan.tsv 中 log2_gap_min ≥ 3 的 194 个基因（含 HTRA3）
-    numerator:                    # 状态基因候选（比原规则放宽，留给优化去选）
+      exclude_slide_dropout: true # the 194 genes with log2_gap_min >= 3 in run_dropout_scan.tsv (including HTRA3)
+    numerator:                    # state-gene candidates (looser than the original rules, left to optimisation)
       pooled_fdr_max: 0.05
       pooled_log2fc_min: 0.75
-      min_fib_contribution: 0.5   # 每个训练数据集
-      max_candidates: 60          # 按 pooled log2FC 取前 60
-    denominator:                  # 参考基因候选
+      min_fib_contribution: 0.5   # each training dataset
+      max_candidates: 60          # top 60 by pooled log2FC
+    denominator:                  # reference-gene candidates
       max_abs_log2fc_across_states: 0.75
       min_fib_contribution: 0.6
       min_fib_cpm: 50
-      max_candidates: 60          # 按成纤维细胞 CPM 取前 60
-  simulation:                     # 目标函数所用的模拟 bulk（每个训练数据集分别生成）
+      max_candidates: 60          # top 60 by fibroblast CPM
+  simulation:                     # simulated bulk for the objective (generated per training dataset)
     mixtures:
       n_cells: 2000
-      caf_frac: [0.01, 0.02, 0.05, 0.10, 0.20, 0.30, 0.50]   # 比上次多了 1%、2% 两档低基质
+      caf_frac: [0.01, 0.02, 0.05, 0.10, 0.20, 0.30, 0.50]   # two additional low-stroma levels (1%, 2%) compared with the previous run
       cthrc1_frac: [0.0, 0.1, 0.2, 0.3, 0.5, 0.7]
       reps: 10
     natural: {min_caf_atlas_cells: 30}
-  objective: >                    # 越大越好；每个训练数据集分别计算后取均值
-    J = ρ_state(混合) − |ρ_CAF(混合)| + 偏ρ_state(真实样本) − |偏ρ_CAF(真实样本)|
+  objective: >                    # higher is better; computed per training dataset and averaged
+    J = ρ_state(mixtures) − |ρ_CAF(mixtures)| + partial ρ_state(real samples) − |partial ρ_CAF(real samples)|
   search:
-    method: alternating_greedy    # 固定分母、前向逐个加入分子基因；再固定分子、选分母；交替 2 轮，确定性
+    method: alternating_greedy    # fix the denominator and add numerator genes forward one at a time; then fix the numerator and select the denominator; alternate 2 rounds, deterministic
     start_denominator: pan_CAF_v4 # DCN, LOX, OMD, CILP
-    size: {min: 5, max: 15}       # 两个基因集各自的大小范围；J 提升 < 0.005 时停止加入
+    size: {min: 5, max: 15}       # size range of each gene set; stop adding when J improves by < 0.005
     tie_break: fewer_genes
   evaluation:
-    lodo: true                    # 在两个发现集数据集上选基因，在第三个上评估（3 次）；最终基因集用全部三个选
+    lodo: true                    # select genes on two discovery datasets and evaluate on the third (3 times); the final gene sets use all three
     external_natural_pseudobulk: [GSE242230, GSE202051, GSE253429, GSE291124]
-    # 外部真值：fig1_15 的 CTHRC1+ 匹配结果（匹配时未使用任何程序/泛 CAF 基因）与独立谱系注释；
-    # 需重跑 fig1_15 以保存全局谱系（规则与种子不变）
-    comparators: [program_v4_rel, Dominguez_LRRC15_rel, Moffitt_activated_rel]   # 均用原 4 基因分母；另报告换用 v5 分母的结果
-  success:                        # 全部满足才采用 v5
-    lodo_mixtures_min_rho_state: 0.90       # 每个留出数据集
-    lodo_mixtures_max_abs_rho_caf: 0.10     # 每个留出数据集，含 1–2% 低基质
-    lodo_natural_max_abs_partial_caf: 0.30  # 三个留出数据集合并（原程序 −0.42，未达标的那一条）
+    # External truth: CTHRC1+ matches from fig1_15 (no programme/pan-CAF genes used in matching) and independent lineage annotation;
+    # fig1_15 must be re-run to save the global lineages (rules and seeds unchanged)
+    comparators: [program_v4_rel, Dominguez_LRRC15_rel, Moffitt_activated_rel]   # all with the original 4-gene denominator; results with the v5 denominator also reported
+  success:                        # v5 adopted only if all are met
+    lodo_mixtures_min_rho_state: 0.90       # each held-out dataset
+    lodo_mixtures_max_abs_rho_caf: 0.10     # each held-out dataset, including 1–2% low stroma
+    lodo_natural_max_abs_partial_caf: 0.30  # three held-out datasets pooled (original programme −0.42, the criterion it missed)
     lodo_natural_min_partial_state: 0.60
-    beats_dominguez: >              # 与 Dominguez_rel 比：在留出数据集的低基质混合（CAF ≤ 5%）和外部真实样本中，
-      |ρ_CAF| 更小，且 ρ_state 不低于其 0.02 以上；外部 4 个数据集中至少 3 个满足
-    external_not_worse: 0.05        # 外部真实样本的偏 ρ_state 不比原程序低 0.05 以上
+    beats_dominguez: >              # versus Dominguez_rel: in low-stroma mixtures of held-out datasets (CAF <= 5%) and in external real samples,
+      |ρ_CAF| smaller and ρ_state not more than 0.02 lower; met in at least 3 of the 4 external datasets
+    external_not_worse: 0.05        # partial ρ_state in external real samples not more than 0.05 below the original programme
 
 # ======================================================================================
-# 2026-10-19 Figure 2：bulk 队列（TCGA-PAAD 发现，CPTAC-PDA 验证）。在读取任何生存数据之前冻结。
-# 数据（只读，外接盘，不复制原始文件）：
+# 2026-10-19 bulk cohorts (TCGA-PAAD discovery, CPTAC-PDA validation). Fixed before any survival data were read.
+# Data (read only, external drive, raw files not copied):
 fig2:
   data:
     tcga_expr: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/TCGA_EBpp_RNASeqV2.geneExp.xena.gz   # log2(norm+1)
@@ -247,302 +247,302 @@ fig2:
     cptac_clin: /Volumes/zhaiyue/TFF1/project_PDAC_Endolysosomal/01_raw/linkedomics_CPTAC_PDAC/clinical_table_140.tsv
     cptac_mut: /Volumes/zhaiyue/TFF1/project_PDAC_Endolysosomal/01_raw/linkedomics_CPTAC_PDAC/Mutation_results.maf
   cohorts:
-    tcga: {sample_type: "01", histology: "Pancreas-Adenocarcinoma Ductal Type"}   # 每名患者一个原发肿瘤样本
-    cptac: {histology: PDAC}                                                     # 排除 5 例腺鳞癌（敏感性分析中纳入）
-  scores:                                   # 表达已是 log2 尺度：得分 = 基因集均值；相对 = 程序 − 泛 CAF
+    tcga: {sample_type: "01", histology: "Pancreas-Adenocarcinoma Ductal Type"}   # one primary tumour sample per patient
+    cptac: {histology: PDAC}                                                     # 5 adenosquamous carcinomas excluded (included in a sensitivity analysis)
+  scores:                                   # expression already on log2 scale: score = gene-set mean; relative = programme − pan-CAF
     primary: program_rel
     comparators: [program, CTHRC1_alone, Moffitt_activated, Moffitt_activated_rel, Dominguez_LRRC15, Dominguez_LRRC15_rel]
-    stroma_abundance: [pan_CAF, ESTIMATE_stromal]          # CPTAC 另有病理估计的 Stromal_fraction、Neoplastic_cellularity
-    tumour_intrinsic: [Moffitt_basal_minus_classical, MPAS] # 关联分析（探索性）
+    stroma_abundance: [pan_CAF, ESTIMATE_stromal]          # CPTAC also has pathology-estimated Stromal_fraction and Neoplastic_cellularity
+    tumour_intrinsic: [Moffitt_basal_minus_classical, MPAS] # association analyses (exploratory)
   analyses:
-    A_decoupling:                           # 主要：bulk 中相对状态是否独立于基质多少
+    A_decoupling:                           # primary: whether the relative state in bulk is independent of stromal amount
       metric: spearman
       against: [ESTIMATE_stromal, pan_CAF, ESTIMATE_purity, Stromal_fraction, Neoplastic_cellularity]
-      success: "|ρ(program_rel, 基质指标)| ≤ 0.3，且小于 |ρ(program, 同一指标)|（两个队列）"
-    B_prognosis:                            # 主要：总生存
-      endpoint: {tcga: OS, cptac: OS}       # TCGA 用 TCGA-CDR 的 OS / OS.time；CPTAC 用 vital_status + follow_up_days
+      success: "|ρ(program_rel, stromal measure)| <= 0.3 and smaller than |ρ(program, same measure)| (both cohorts)"
+    B_prognosis:                            # primary: overall survival
+      endpoint: {tcga: OS, cptac: OS}       # TCGA uses TCGA-CDR OS / OS.time; CPTAC uses vital_status + follow_up_days
       secondary_endpoint: {tcga: PFI}
-      predictor: "program_rel，队列内 z 标准化，每 1 SD 的 HR"
+      predictor: "program_rel, z-scored within cohort, HR per 1 SD"
       cox_univariable: true
       cox_multivariable: [age, stage_group, ESTIMATE_stromal, Moffitt_basal_minus_classical]   # stage_group: I–IIA vs IIB–IV
       cptac_extra_covariate: Stromal_fraction
-      km: "队列内中位数二分，仅作描述"
-      success: "TCGA 多因素 HR > 1 且 p < 0.05；CPTAC 多因素同方向且 p < 0.05（两者都满足才算成立）"
-    C_head_to_head:                         # 次要：同一 Cox 模型中替换为各比较得分；报告 HR 与 C-index
+      km: "split at the within-cohort median, descriptive only"
+      success: "TCGA multivariable HR > 1 and p < 0.05; CPTAC multivariable in the same direction with p < 0.05 (both required)"
+    C_head_to_head:                         # secondary: each comparison score substituted in the same Cox model; HR and C-index reported
       models: [program_rel, program, CTHRC1_alone, Moffitt_activated, Moffitt_activated_rel, Dominguez_LRRC15, Dominguez_LRRC15_rel]
-    D_biology:                              # 探索性，不作为成败标准
+    D_biology:                              # exploratory, not a success criterion
       items: [Moffitt_basal_minus_classical, MPAS, KRAS_mutated, KRAS_allele]
-  multiple_testing: "A、B 为预设主要检验；C、D 为次要/探索性，结果标注为探索性"
+  multiple_testing: "A and B are the prespecified primary tests; C and D are secondary/exploratory and labelled as such"
 
-# 2026-10-19 Figure 2 补充：多队列生存 meta 分析（在 TCGA / CPTAC 阴性之后提出；在计算任何 GEO 生存关联之前冻结）
-# 论文中须如实说明：此分析是在主要预设检验（TCGA、CPTAC）阴性之后追加的。
+# 2026-10-19 bulk supplement: multi-cohort survival meta-analysis (proposed after TCGA / CPTAC were negative; fixed before any GEO survival association was computed)
+# The paper must state that this analysis was added after the primary prespecified tests (TCGA, CPTAC) were negative.
 fig2_meta:
-  geo_dir: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/geo_paad   # 只读
-  cohorts:                       # 纳入规则：原发 PDAC 肿瘤样本、有 OS、表达可映射到基因名
+  geo_dir: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/geo_paad   # read only
+  cohorts:                       # inclusion: primary PDAC tumour samples with OS and expression mappable to gene symbols
     GSE28735: {platform: GPL6244, probe_map: GPL6244_probe2symbol.tsv, keep: "tissue: T", time: survival_month, event: cancer_death, time_unit: month}
     GSE62452: {platform: GPL6244, probe_map: GPL6244_probe2symbol.tsv, keep: "tissue: Pancreatic tumor", time: survival months, event: survival status, time_unit: month}
     GSE57495: {platform: GPL15048, probe_map: GPL15048_probe2symbol.tsv, time: "overall survival (month)", event: vital.status, time_unit: month}
     GSE71729: {platform: GPL20769, probe_map: null, keep: "tissue type: Primary", time: survival_months, event: death_event_1death_0censor, time_unit: month, channel: 2}
     GSE85916: {platform: GPL13667, probe_map: GPL13667_probe2symbol.tsv, time: os.year, event: death, time_unit: year}
-    # 用户 2026-10-19 同意下载 GPL4133 平台表（仅 ID→GENE_SYMBOL），按预设规则纳入；纳入决定在看到其结果之前做出
+    # GPL4133 platform table downloaded 2026-10-19 (ID→GENE_SYMBOL only) and included by the prespecified rule; inclusion decided before seeing its results
     GSE21501: {platform: GPL4133, probe_map: /Users/Zhaiyue/PDAC_HE_Morphotype/data/external/GPL4133_probe2symbol.tsv, keep: "tissue: Patient Primary Pancreatic Tumor", time: os time, event: os event, time_unit: month, channel: 2}
   excluded:
-    GSE79668: "series matrix 无表达数据"
+    GSE79668: "series matrix has no expression data"
   notes:
-    GSE71729: "Moffitt 2015 的发现队列：Moffitt 活化基质基因集源于此，比较该基因集时不独立（另报告排除它的敏感性分析）"
-  probe_collapse: max_mean       # 一个基因多个探针时取平均表达最高的探针
-  scores: same_as_fig2           # 与 fig2 相同的得分定义（基因集均值；相对 = 减泛 CAF）
+    GSE71729: "Moffitt 2015 discovery cohort: the Moffitt activated-stroma gene set was derived here, so it is not independent for that gene set (sensitivity analysis excluding it reported)"
+  probe_collapse: max_mean       # for genes with several probes, the probe with the highest mean expression
+  scores: same_as_fig2           # same score definitions as fig2 (gene-set mean; relative = minus pan-CAF)
   models:
-    primary: univariable          # 各队列协变量不一致 → 主分析为单因素：每 1 SD 的 HR（队列内 z 标准化）
-    secondary: "x + ESTIMATE 基质评分 + Moffitt basal−classical（所有队列都能从表达算出）"
-  pooled_cohorts: [TCGA, CPTAC, GSE28735, GSE62452, GSE57495, GSE71729, GSE85916, GSE21501]   # TCGA/CPTAC 用同样的单因素/次要模型重新计算
+    primary: univariable          # covariates differ between cohorts → primary analysis univariable: HR per 1 SD (z-scored within cohort)
+    secondary: "x + ESTIMATE stromal score + Moffitt basal−classical (computable from expression in every cohort)"
+  pooled_cohorts: [TCGA, CPTAC, GSE28735, GSE62452, GSE57495, GSE71729, GSE85916, GSE21501]   # TCGA/CPTAC recomputed with the same univariable/secondary models
   meta: {method: random_effects_REML, also_report: fixed_effect, heterogeneity: I2}
   primary_score: program_rel
   also_report: [program, CTHRC1_alone, Moffitt_activated, Moffitt_activated_rel, Dominguez_LRRC15, Dominguez_LRRC15_rel, pan_CAF, Moffitt_basal_minus_classical]
-  success: "program_rel 随机效应合并 HR 的 p < 0.05（单因素主分析）；次要模型同方向"
+  success: "random-effects pooled HR of program_rel with p < 0.05 (univariable primary); secondary model in the same direction"
 
 # ======================================================================================
-# 2026-10-20 H&E 主线（Figure 3–5）：草案 v2，待用户确认后冻结；确认前不训练、不评估。
-# 与 v1 的差别：恢复此前约定的三项方法创新（加和式图块预测、混合监督、状态/数量解耦），
-# 加入 Moffitt / Dominguez 基因集作为全程比较对象，并用 StRoMA 的 3 基因评分做流程基准（不弱于范文）。
+# 2026-10-20 H&E line: draft v2, fixed only after confirmation; no training or evaluation before then.
+# Changes from v1: restores the three planned methodological elements (additive tile prediction, mixed supervision, state/amount decoupling),
+# adds the Moffitt / Dominguez gene sets as comparators throughout, and uses the StRoMA 3-gene score as a pipeline benchmark (not weaker than StRoMA).
 he_model:
-  status: frozen_2026-10-20  # 用户确认 v2；公开 Visium HD 下载与编码器比较待用户另行决定（未下载）
+  status: frozen_2026-10-20  # confirmed v2; download of public Visium HD and encoder comparison left for a separate decision
   features:
-    source: "Mahmood Lab 预提取 UNI2-h（20×、256 px、1536 维；CC-BY-NC-ND-4.0）；只读"
-    tcga: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/uni2h_features/tcga_paad   # 146/147 例
-    cptac: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/uni2h_features/cptac_pda  # 135/135 例
+    source: "Mahmood Lab pre-extracted UNI2-h (20×, 256 px, 1536 dimensions; CC-BY-NC-ND-4.0); read only"
+    tcga: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/uni2h_features/tcga_paad   # 146/147 patients
+    cptac: /Volumes/zhaiyue/TFF1/project_PanCancer_Neddylation/01_raw/uni2h_features/cptac_pda  # 135/135 patients
     tiles_per_slide: 4000
-    known_limits: ["TCGA 官方图块只覆盖约一半组织", "CPTAC 切片未标注肿瘤/癌旁", "两队列扫描与切块方式不同",
-                   "TCGA/CPTAC 只有 UNI2-h 特征，无法做编码器比较（需另下载全切片）"]
-  targets:                                   # TCGA bulk，队列内 z 标准化
+    known_limits: ["official TCGA tiles cover only about half of the tissue", "CPTAC slides not labelled tumour/adjacent", "scanning and tiling differ between cohorts",
+                   "TCGA/CPTAC only have UNI2-h features, so encoders cannot be compared (would need whole slides)"]
+  targets:                                   # TCGA bulk, z-scored within cohort
     ours: {state: program_rel, abundance: pan_CAF, raw: program}
     comparators: {M_rel: Moffitt_activated_rel, M_raw: Moffitt_activated, D_rel: Dominguez_LRRC15_rel, D_raw: Dominguez_LRRC15}
-    benchmark: {StRoMA_3gene: [COL12A1, LOX, LOXL2]}   # 只用于检验我们的流程不弱于范文（范文 CPTAC ρ = 0.458）
+    benchmark: {StRoMA_3gene: [COL12A1, LOX, LOXL2]}   # only to check our pipeline is not weaker than StRoMA (StRoMA CPTAC ρ = 0.458)
   innovations:
     I1_additive_decoupled: >
-      每个图块输出两个非负局部量：程序表达 p_i、泛 CAF 表达 c_i（softplus）。切片层面按 bulk 的生物学定义线性汇总：
-      P = mean(p_i)，C = mean(c_i)；预测的数量 = log C，预测的状态 = log P − log C。
-      损失同时拟合 bulk 的 log 程序与 log 泛 CAF。状态与数量在结构上分开；图块输出就是该位置的局部预测，可直接与 Visium HD 对比。
+      each tile outputs two non-negative local quantities: programme expression p_i and pan-CAF expression c_i (softplus). Slide level aggregates linearly, as in bulk:
+      P = mean(p_i), C = mean(c_i); predicted amount = log C, predicted state = log P − log C.
+      the loss fits bulk log programme and log pan-CAF together. State and amount are separated by construction; tile outputs are local predictions directly comparable with Visium HD.
     I2_mixed_supervision: >
-      在 I1 的损失中加入 Visium HD 的局部标签（每个图块位置实测的程序与泛 CAF 表达），与 TCGA bulk 标签一起训练。
-      评估用留一患者（4 例自有 Visium HD 轮流留出）；若用户同意下载，另用 10x 公开胰腺癌 Visium HD 作完全独立的空间测试。
-    I3_state_abundance: "状态与数量分别验证：预测状态需在控制 bulk 泛 CAF 后仍与 bulk 状态相关；预测数量需与 ESTIMATE / 病理基质比例相关"
-  baselines:                                 # 消融与范文式对照，全部同样的 CV 与外部测试
-    B1_ridge_meanpool: "均值池化 + 岭回归，直接回归各目标"
-    B2_abmil_slide: "注意力 MIL 直接回归切片层面得分（范文式：只有切片输出，注意力权重作热图）"
-    ablations: ["I1 vs B2（加和式 vs 注意力）", "I1+I2 vs I1（有无混合监督）", "I1 的 log 比值 vs 直接回归相对得分"]
+      local Visium HD labels (measured programme and pan-CAF expression at each tile) are added to the I1 loss and trained together with TCGA bulk labels.
+      evaluated leave-one-patient-out (each of the 4 PDAC Visium HD sections held out in turn); if download is approved, the public 10x PDAC Visium HD section serves as a fully independent spatial test.
+    I3_state_abundance: "state and amount validated separately: predicted state must correlate with bulk state after controlling bulk pan-CAF; predicted amount must correlate with ESTIMATE / pathology stromal fraction"
+  baselines:                                 # ablations and StRoMA-style comparators, all with the same CV and external test
+    B1_ridge_meanpool: "mean pooling + ridge regression, direct regression of each target"
+    B2_abmil_slide: "attention MIL regressing slide-level scores directly (StRoMA style: slide output only, attention weights as heat map)"
+    ablations: ["I1 vs B2 (additive vs attention)", "I1+I2 vs I1 (with or without mixed supervision)", "I1 log ratio vs direct regression of the relative score"]
   evaluation:
-    tcga_cv: "患者层面 5 折 × 5 次重复；折外 Spearman ρ"
-    cptac_external: "全部 TCGA 训练 → CPTAC；Spearman ρ；1000 次置换"
-    decoupling: "CPTAC：偏 ρ(预测状态, bulk 状态 | bulk 泛 CAF)；预测数量 vs ESTIMATE 与病理基质比例"
-    spatial: "Visium HD 150 µm 区域（100 µm 敏感性）：每个样本预测 vs 实测的 Spearman ρ；比较 I1、I1+I2、B2"
-    prognosis: "H&E 预测的状态 / 数量 / 原始得分，以及 M、D 的预测值：TCGA 折外 + CPTAC，每 1 SD HR，两队列合并"
-    benchmark: "StRoMA 3 基因评分用同一流程预测，CPTAC ρ 与范文报告的 0.458 比较"
+    tcga_cv: "patient-level 5-fold × 5 repeats; out-of-fold Spearman ρ"
+    cptac_external: "train on all TCGA → CPTAC; Spearman ρ; 1000 permutations"
+    decoupling: "CPTAC: partial ρ(predicted state, bulk state | bulk pan-CAF); predicted amount vs ESTIMATE and pathology stromal fraction"
+    spatial: "Visium HD 150 µm regions (100 µm sensitivity): Spearman ρ of predicted vs measured per sample; compare I1, I1+I2, B2"
+    prognosis: "H&E-predicted state / amount / raw score, plus predicted M and D: TCGA out-of-fold + CPTAC, HR per 1 SD, both cohorts pooled"
+    benchmark: "StRoMA 3-gene score predicted with the same pipeline; CPTAC ρ compared with the reported 0.458"
   success:
     cptac_state_rho: 0.30
     tcga_cv_state_rho: 0.30
-    cptac_decoupling: "偏 ρ > 0 且 p < 0.05"
-    spatial: "I1（或 I1+I2 留一患者）在 4 例中至少 3 例 ρ ≥ 0.3"
-    innovation_claim: "I1 或 I1+I2 在 CPTAC 或空间验证上优于 B2，才写成方法学改进；否则如实报告为持平"
-    not_weaker_than_StRoMA: "我们流程预测 StRoMA 3 基因评分的 CPTAC ρ 不低于 0.458 的 95% CI 下限"
-    prognosis: "次要：合并 HR > 1 且 p < 0.05"
+    cptac_decoupling: "partial ρ > 0 and p < 0.05"
+    spatial: "I1 (or I1+I2 leave-one-patient-out) ρ >= 0.3 in at least 3 of 4 sections"
+    innovation_claim: "described as a methodological improvement only if I1 or I1+I2 beats B2 on CPTAC or spatial validation; otherwise reported as equivalent"
+    not_weaker_than_StRoMA: "CPTAC ρ of our pipeline for the StRoMA 3-gene score not below the lower 95% CI bound of 0.458"
+    prognosis: "secondary: pooled HR > 1 and p < 0.05"
 
-# 2026-10-20 he_model 修订（用户同意；在运行任何修订分析之前冻结）。第一轮结果（he_02）保留并如实报告。
+# 2026-10-20 he_model amendments (approved; fixed before any amended analysis was run). First-round results (he_02) are kept and reported.
 he_amendments:
-  A1_gc_protocol:                  # 照搬胃癌项目（project_GC_CAF_pathomics 2026-10-06_Figure2_UNI2h_run01）的流程，只用岭回归
-    target_scoring: "每个基因在训练折内 z 标准化后取平均（基因等权）；外部队列用自身的基因均值 / SD"
+  A1_gc_protocol:                  # ridge-only protocol following an earlier in-house pipeline
+    target_scoring: "each gene z-scored within training folds, then averaged (genes equally weighted); external cohorts use their own gene means / SDs"
     state_definitions:
-      primary: residual            # 基因集得分对泛 CAF 得分的线性回归残差（系数在训练折内拟合）
-      also: subtraction            # 基因集得分 − 泛 CAF 得分（与第一轮一致，作对照）
-    targets: [program, pan_CAF, Moffitt_activated, Dominguez_LRRC15, StRoMA_3gene]   # 前三者另有 residual / subtraction 两种状态
-    ridge: "StandardScaler + Ridge；GridSearchCV alpha = logspace(-2, 4, 13)，内层 4 折 shuffled KFold，scoring = MSE"
-    slide_aggregation: "每张切片内图块均值，再在患者内各切片等权平均"
-    cv: "与第一轮相同的 5 折 × 5 次重复（KFold 种子不变）"
-    metrics: "Pearson r（bootstrap 2000 次 95% CI）、Spearman ρ、R²（TCGA 交叉验证，按患者对各重复取平均后计算）；CPTAC 另做 1000 次置换"
-  A2_nested_tuning:                # I1 与 B2 同等预算的嵌套调参
-    grid: {lr: [1.0e-4, 3.0e-4, 1.0e-3], epochs: [20, 40, 80], weight_decay: [1.0e-4, 1.0e-2]}   # 18 组；轮数用同一次训练的 20/40/80 轮检查点
-    cv: "外层 5 折 × 1 次重复（第一轮 rep 0 的折）；每个外层训练集内 3 折选参"
-    selection_metric: "内层预测状态（A1 的 residual 定义）的 Spearman ρ"
-    targets: "与 A1 相同（I1 的头拟合各基因集得分，状态由输出导出：减法与训练折内残差两种）"
-    cptac: "在全部 TCGA 上用同样的 3 折选参，最终配置训练 5 个种子取均值"
-    logging: "保存训练损失曲线"
-  A3_own_tcga_features:            # 2026-10-20 用户同意下载 209 张 TCGA-PAAD 诊断切片；在提取任何特征之前冻结
-    reason: "质控发现官方 TCGA 预提取特征只覆盖约一半组织（腺泡含量 ρ = 0.08，而 CPTAC 为 0.44）"
-    slides: /Volumes/INTENSO/TCGA_PAAD_svs   # md5 核对后的 .svs
-    protocol: "照搬胃癌项目 extract_uni2h_embeddings.py：缩略图组织掩膜（HSV 饱和度 > 18，亮度 40–235），128 µm 视野（按 mpp 换算的 level-0 像素），组织占比 ≥ 0.5，UNI2-h 自带的 timm 预处理"
-    tiles_per_slide: 1000          # 胃癌为 250；此处取 1000 以提高覆盖并支持图块层面的 I1 模型（种子 = file_id 哈希，同胃癌）
-    load_control: "nice 10，批大小 16，系统负载过高时暂停"
-    downstream: "A1（岭回归）与 A2（I1 / B2 嵌套调参）全部改用新特征重跑；旧特征结果保留并报告"
-    cptac_caveat: "CPTAC 仍用 Mahmood 预提取特征（同为 UNI2-h、20×），两队列提取流程不同，作为局限报告"
-  A4_stroma_model_replication:     # 2026-10-20 用户同意；在训练之前冻结。诊断性分析，不改变主分析
-    purpose: "检验范文 StRoMA 的 TCGA 内部结果（Spearman 0.655，AUC 0.811）能否用其模型设计复现"
-    cohort: "TCGA 全部 PAAD 原发肿瘤（176 例有自提特征，范文 178 例）；按切片训练、按病例分折、病例层面取平均评估"
-    target: "COL12A1/LOX/LOXL2：log2 表达逐基因 z 标准化后取平均；每折在训练集内再标准化"
+      primary: residual            # linear-regression residual of the gene-set score on the pan-CAF score (coefficients fitted in training folds)
+      also: subtraction            # gene-set score − pan-CAF score (as in round one, for comparison)
+    targets: [program, pan_CAF, Moffitt_activated, Dominguez_LRRC15, StRoMA_3gene]   # the first three also have residual / subtraction states
+    ridge: "StandardScaler + Ridge; GridSearchCV alpha = logspace(-2, 4, 13), inner 4-fold shuffled KFold, scoring = MSE"
+    slide_aggregation: "tile mean within each slide, then equal-weight mean of slides within patient"
+    cv: "same 5-fold × 5 repeats as round one (KFold seed unchanged)"
+    metrics: "Pearson r (2000-bootstrap 95% CI), Spearman ρ, R² (TCGA CV, computed after averaging repeats per patient); CPTAC also 1000 permutations"
+  A2_nested_tuning:                # nested tuning with equal budgets for I1 and B2
+    grid: {lr: [1.0e-4, 3.0e-4, 1.0e-3], epochs: [20, 40, 80], weight_decay: [1.0e-4, 1.0e-2]}   # 18 combinations; epochs are 20/40/80 checkpoints of one run
+    cv: "outer 5-fold × 1 repeat (rep 0 folds of round one); 3-fold tuning within each outer training set"
+    selection_metric: "inner Spearman ρ of the predicted state (A1 residual definition)"
+    targets: "as A1 (I1 heads fit each gene-set score; state derived from outputs by subtraction and by training-fold residual)"
+    cptac: "same 3-fold tuning on all TCGA; final configuration trained with 5 seeds and averaged"
+    logging: "training loss curves saved"
+  A3_own_tcga_features:            # download of 209 TCGA-PAAD diagnostic slides approved 2026-10-20; fixed before any feature extraction
+    reason: "QC showed the official pre-extracted TCGA features cover only about half of the tissue (acinar content ρ = 0.08 vs 0.44 in CPTAC)"
+    slides: /Volumes/INTENSO/TCGA_PAAD_svs   # .svs after md5 check
+    protocol: "following extract_uni2h_embeddings.py of an earlier in-house pipeline: thumbnail tissue mask (HSV saturation > 18, brightness 40–235), 128 µm field (level-0 pixels from mpp), tissue fraction >= 0.5, UNI2-h timm preprocessing"
+    tiles_per_slide: 1000          # 1000 to improve coverage and support tile-level I1 (seed = file_id hash)
+    load_control: "nice 10, batch size 16, pause when system load is high"
+    downstream: "A1 (ridge) and A2 (I1 / B2 nested tuning) all re-run with the new features; results with the old features kept and reported"
+    cptac_caveat: "CPTAC still uses the Mahmood pre-extracted features (also UNI2-h, 20×); extraction differs between cohorts and is reported as a limitation"
+  A4_stroma_model_replication:     # approved 2026-10-20; fixed before training. Diagnostic analysis; does not change the main analysis
+    purpose: "test whether the StRoMA TCGA internal results (Spearman 0.655, AUC 0.811) can be reproduced with its model design"
+    cohort: "all TCGA PAAD primary tumours (176 with self-extracted features; 178 in StRoMA); trained per slide, folds by case, evaluated as case-level means"
+    target: "COL12A1/LOX/LOXL2: log2 expression z-scored per gene, then averaged; re-standardised within each training fold"
     model: >
-      照范文 Methods 与表 1（UNI 列）：Linear(1536→64)+ReLU+Dropout(0.5)；二维正弦位置编码（图块网格坐标）；
-      1 层 8 头 Transformer 编码器（FF 512，Pre-LN）；可学习 CLS 通过 1 层 8 头 Transformer 解码器做交叉注意力；Dropout + Linear(64→1)。
-      损失 SmoothL1(δ=1) + 0.5 × 成对排序损失（margin 0.1，仅 |Δy| > 0.05 的配对）；AdamW lr 5e-5、wd 5e-4、余弦退火、最多 200 轮；
-      物理批 1、梯度累积 8；Manifold Mixup α = 0.2（投影后的图块特征与目标同比插值）；训练时每轮随机取 1024 个图块并按位置排序，
-      评估时等距取 1024 个图块；早停 patience 15。
-    cv: "StratifiedKFold 10 折（按中位数二分分层），与 he_07 相同的折"
+      following the StRoMA Methods and Table 1 (UNI column): Linear(1536→64)+ReLU+Dropout(0.5); 2D sinusoidal positional encoding (tile grid coordinates);
+      1-layer 8-head Transformer encoder (FF 512, Pre-LN); learnable CLS cross-attends through a 1-layer 8-head Transformer decoder; Dropout + Linear(64→1).
+      loss SmoothL1(δ=1) + 0.5 × pairwise ranking loss (margin 0.1, only pairs with |Δy| > 0.05); AdamW lr 5e-5, wd 5e-4, cosine annealing, up to 200 epochs;
+      physical batch 1, gradient accumulation 8; Manifold Mixup α = 0.2 (projected tile features and targets interpolated together); 1024 random tiles per epoch sorted by position in training,
+      1024 evenly spaced tiles at evaluation; early-stopping patience 15.
+    cv: "StratifiedKFold 10 folds (stratified on the median split), same folds as he_07"
     variants:
-      honest: "早停依据：从训练折中分层留出 10% 病例作为验证集；测试折完全不参与"
-      leaky_as_reported: "早停依据：测试折本身（范文的写法看起来是这样）。只用于诊断，不作为任何结论"
-    metrics: "每折 Spearman 与 AUC(Z>0) 的平均 ± SD（范文口径），以及合并折外预测的 Spearman / AUC"
-    features: "自提 UNI2-h 全切片特征（无 Macenko 标准化）；范文所述 'UNI，1536 维' 与 UNI2-h 维度一致"
-  A5_mixed_supervision_and_spatial:   # 2026-10-20 用户同意"①混合监督 ②只看间质 + 空间验证"；训练前冻结
-    hd_tiles: "results/he/hd/{A1,D1,A2,D2}.npz（he_09：128 µm、全部组织图块、UNI2-h；图块内有核细胞的伪 bulk 标签）"
-    hd_label_filter: "图块内细胞数 ≥ 5、非腺泡总 UMI ≥ 500、泛 CAF UMI ≥ 5"
-    hd_local_targets: "log1p(1e4 × 程序 UMI / 非腺泡 UMI) 与 log1p(1e4 × 泛 CAF UMI / 非腺泡 UMI)，各样本内 z 标准化"
+      honest: "early stopping on a stratified 10% validation split of the training folds; the test fold is never used"
+      leaky_as_reported: "early stopping on the test fold itself (as StRoMA appears to have done). Diagnostic only, no conclusions drawn"
+    metrics: "per-fold mean ± SD of Spearman and AUC(Z>0) (as reported by StRoMA), plus Spearman / AUC of pooled out-of-fold predictions"
+    features: "self-extracted UNI2-h whole-slide features (no Macenko normalisation); the 'UNI, 1536 dimensions' described by StRoMA matches UNI2-h"
+  A5_mixed_supervision_and_spatial:   # approved 2026-10-20 ('mixed supervision; stroma only + spatial validation'); fixed before training
+    hd_tiles: "results/he/hd/{A1,D1,A2,D2}.npz (he_09: 128 µm, all tissue tiles, UNI2-h; pseudo-bulk labels of nucleated cells in each tile)"
+    hd_label_filter: "cells per tile >= 5, non-acinar total UMI >= 500, pan-CAF UMI >= 5"
+    hd_local_targets: "log1p(1e4 × programme UMI / non-acinar UMI) and log1p(1e4 × pan-CAF UMI / non-acinar UMI), z-scored within sample"
     models:
-      I1_bulk: "A2 中在全部 TCGA 上选出的配置（lr 3e-4、wd 1e-2、80 轮），只用 TCGA bulk 标签"
+      I1_bulk: "configuration selected by A2 on all TCGA (lr 3e-4, wd 1e-2, 80 epochs), TCGA bulk labels only"
       I1_I2_mixed: >
-        同一 I1 结构；每步 = 1 名 TCGA 病人的 bulk 损失 + 256 个 HD 图块的局部损失（权重 1）；
-        局部预测 = a_k·log(p_ik) + b_k（与切片层面同一组 a、b，k = 程序 / 泛 CAF 两个头），HD 标签按样本 z 标准化后匹配；其余同 I1_bulk
-      B2_attention: "A2 中在全部 TCGA 上选出的配置；空间图 = 注意力权重（范文做法）"
-      ridge_tile: "A1 自提特征岭回归，直接作用于单个图块特征得到图块预测"
-      stroma_only: "I1_bulk 的泛 CAF 局部输出最高的 30% 图块做均值池化 + 岭回归（只看间质）；用于 bulk 预测比较"
+        same I1 architecture; each step = bulk loss of 1 TCGA patient + local loss of 256 HD tiles (weight 1);
+        local prediction = a_k·log(p_ik) + b_k (same a, b as at slide level, k = programme / pan-CAF heads), HD labels matched after within-sample z-scoring; otherwise as I1_bulk
+      B2_attention: "configuration selected by A2 on all TCGA; spatial map = attention weights (as in StRoMA)"
+      ridge_tile: "A1 ridge on self-extracted features, applied directly to single-tile features to obtain tile predictions"
+      stroma_only: "mean pooling + ridge over the 30% of tiles with the highest I1_bulk pan-CAF local output (stroma only); for the bulk prediction comparison"
     spatial_eval:
-      design: "I1_I2_mixed 用留一患者（4 例 HD 轮流留出）；其余模型不使用 HD 训练，直接在 4 例上评估"
-      regions: "150 µm 网格（主），100 µm（敏感性）；图块按中心落入的区域汇总"
-      region_label: "区域内有核细胞的伪 bulk：相对状态 = log1p CP10k(程序) − log1p CP10k(泛 CAF)"
-      region_pred: "I1：log(区域内 p 均值) − log(区域内 c 均值)；B2：注意力均值；ridge：图块预测均值"
-      region_filter: "富含 CAF 的区域（泛 CAF UMI ≥ 10 /(100 µm)²，同 hd_measurability），细胞 ≥ 5，腺泡占比 ≤ 20%"
-      metric: "每个样本区域层面 Spearman ρ（预测 vs 实测相对状态）"
-      success: "≥ 3/4 样本 ρ ≥ 0.3（he_model 原标准）；创新成立需 I1 或 I1_I2 在 ≥ 3/4 样本优于 B2"
-    bulk_eval: "I1_I2_mixed（4 例 HD 全部参与训练）在 TCGA 5 折（A2 rep 0 折）与 CPTAC 外部重新评估；报告 Spearman 与 AUC；stroma_only 同样评估"
-  A6_10x_independent_spatial:      # 2026-10-20 用户同意下载到 INTENSO_BIG；在任何预测或评估之前冻结
-    data: "/Volumes/INTENSO_BIG/10x_VisiumHD_3prime_Human_Pancreatic_Cancer（Visium HD 3′，新鲜冰冻，Space Ranger 4.0.1，CC BY 4.0）"
-    role: "完全独立的空间测试：不参与任何训练或选择；所有模型（I1_bulk、I1_I2_mixed 用全部 4 例自有 HD 训练、B2、ridge_tile）冻结后一次性评估"
-    tiles: "与 he_09 相同：128 µm、组织掩膜、全部组织图块、UNI2-h；图像 = tissue_image.btf（0.274 µm/px）"
-    labels: "8 µm bin（无细胞分割核）按 bin 中心落入图块 / 区域汇总；区域筛选中 '细胞 ≥ 5' 改为 '区域非腺泡 UMI ≥ 500'，其余（泛 CAF UMI 阈值、腺泡 ≤ 20%）不变"
-    metric_success: "与 A5 相同：150 µm（主）/ 100 µm，富含 CAF 区域的 Spearman ρ；单样本，报告 95% bootstrap CI"
-    caveats: ["新鲜冰冻切片（训练用 FFPE）", "3′ 全转录组化学（自有 HD 为探针法）"]
-  A7_prognosis_he_predicted:       # 2026-10-20 用户要求；在计算任何生存关联之前冻结
+      design: "I1_I2_mixed leave-one-patient-out (each of the 4 HD sections held out in turn); other models do not train on HD and are evaluated directly on the 4 sections"
+      regions: "150 µm grid (primary), 100 µm (sensitivity); tiles aggregated into the region containing their centre"
+      region_label: "pseudo-bulk of nucleated cells in the region: relative state = log1p CP10k(programme) − log1p CP10k(pan-CAF)"
+      region_pred: "I1: log(mean p in region) − log(mean c in region); B2: mean attention; ridge: mean tile prediction"
+      region_filter: "CAF-rich regions (pan-CAF UMI >= 10 /(100 µm)², as hd_measurability), cells >= 5, acinar fraction <= 20%"
+      metric: "region-level Spearman ρ per sample (predicted vs measured relative state)"
+      success: "ρ >= 0.3 in >= 3/4 samples (original he_model criterion); the innovation holds only if I1 or I1_I2 beats B2 in >= 3/4 samples"
+    bulk_eval: "I1_I2_mixed (all 4 HD sections in training) re-evaluated on TCGA 5-fold (A2 rep 0 folds) and CPTAC external; Spearman and AUC reported; stroma_only evaluated likewise"
+  A6_10x_independent_spatial:      # download approved 2026-10-20; fixed before any prediction or evaluation
+    data: "/Volumes/INTENSO_BIG/10x_VisiumHD_3prime_Human_Pancreatic_Cancer (Visium HD 3′, fresh frozen, Space Ranger 4.0.1, CC BY 4.0)"
+    role: "fully independent spatial test, not used in any training or selection; all models (I1_bulk, I1_I2_mixed trained on all 4 PDAC Visium HD sections, B2, ridge_tile) evaluated once after fixing"
+    tiles: "as he_09: 128 µm, tissue mask, all tissue tiles, UNI2-h; image = tissue_image.btf (0.274 µm/px)"
+    labels: "8 µm bins (no nucleus segmentation) aggregated by bin centre into tiles / regions; the region filter 'cells >= 5' is replaced by 'region non-acinar UMI >= 500'; other filters (pan-CAF UMI threshold, acinar <= 20%) unchanged"
+    metric_success: "as A5: Spearman ρ in CAF-rich regions at 150 µm (primary) / 100 µm; single sample, 95% bootstrap CI reported"
+    caveats: ["fresh-frozen section (training used FFPE)", "3′ whole-transcriptome chemistry (the PDAC Visium HD sections are probe-based)"]
+  A7_prognosis_he_predicted:       # fixed before any survival association was computed
     predictions:
-      primary_model: "I1（只用 bulk 训练；A2 嵌套调参）：TCGA = A2 外层 5 折折外预测；CPTAC = 全部 TCGA 训练、5 个种子平均"
-      comparators: ["B2 注意力 MIL（A2，同样来源）", "岭回归（A1 自提特征；TCGA 为 5×5 折外预测的平均）"]
-      note: "I1+混合监督在 A5 只保存了汇总指标、没有保存逐病人预测，因此不纳入"
+      primary_model: "I1 (bulk training only; A2 nested tuning): TCGA = A2 outer 5-fold out-of-fold predictions; CPTAC = trained on all TCGA, mean of 5 seeds"
+      comparators: ["B2 attention MIL (A2, same source)", "ridge (A1 self-extracted features; TCGA = mean of 5×5 out-of-fold predictions)"]
+      note: "I1 + mixed supervision saved only summary metrics in A5, not per-patient predictions, so it is not included"
     predictors:
-      primary: "H&E 预测的 9 基因状态（program_resid）"
-      secondary: ["program_sub", "pan_CAF（预测的数量）", "program（预测的原始得分）", "Dominguez_LRRC15_sub", "Moffitt_activated_sub"]
-    endpoint: "总生存（TCGA：TCGA-CDR OS；CPTAC：vital_status + follow_up_days）"
-    models: {univariable: "每 1 SD（队列内 z 标准化）", multivariable: "+ 年龄 + 分期（I–IIA vs IIB–IV）"}
-    pooling: "TCGA + CPTAC 固定效应合并（主），随机效应（敏感性）"
-    reference: "同一批病人 bulk 实测状态的 HR 一并报告"
-    success: "主要预测量的合并 HR > 1 且 p < 0.05（单因素）；多因素同方向"
-  A8_pancancer_spatial_pretraining:   # 2026-10-21 草案，待用户确认后冻结；确认前不提取特征、不训练
-    status: frozen_2026-10-21          # 用户确认；运行要求：低负载（nice 19、2 线程、小批量、批间暂停、负载高时暂停）
-    data: "/Volumes/INTENSO_BIG/HEST1k（163 个样本；共享目录只读，派生文件写到 results/he/A8/）"
+      primary: "H&E-predicted nine-gene state (program_resid)"
+      secondary: ["program_sub", "pan_CAF (predicted amount)", "program (predicted raw score)", "Dominguez_LRRC15_sub", "Moffitt_activated_sub"]
+    endpoint: "overall survival (TCGA: TCGA-CDR OS; CPTAC: vital_status + follow_up_days)"
+    models: {univariable: "per 1 SD (z-scored within cohort)", multivariable: "+ age + stage (I–IIA vs IIB–IV)"}
+    pooling: "TCGA + CPTAC fixed-effect pooling (primary), random effects (sensitivity)"
+    reference: "HR of the measured bulk state in the same patients reported alongside"
+    success: "pooled HR of the primary predictor > 1 with p < 0.05 (univariable); multivariable in the same direction"
+  A8_pancancer_spatial_pretraining:   # 2026-10-21 draft, fixed after confirmation; no feature extraction or training before then
+    status: frozen_2026-10-21          # confirmed; low load required (nice 19, 2 threads, small batches, pauses between batches, pause under high load)
+    data: "/Volumes/INTENSO_BIG/HEST1k (163 samples; shared directory read only, derived files written to results/he/A8/)"
     sets:
-      pretrain: "非胰腺的 158 个样本（44 个研究）"
-      pdac_test: "HEST 胰腺癌 NCBI569–572（4）+ 自有 Visium HD A1/D1/A2/D2（4）；TENX179（=10x）已用过一次，只作探索性参考"
-    sample_qc: "9 个程序基因中 ≥ 7 个、4 个泛 CAF 基因全部在表达矩阵中；富含 CAF 的区域 ≥ 100 个；否则排除并记录"
-    features: "HEST 图块（224 px，0.5 µm/px，约 112 µm）→ UNI2-h（与 TCGA 相同的 timm 预处理）；自有 HD 与 TCGA 沿用已提取的 128 µm 特征（尺度差 12%，作为局限报告）"
-    region_definition: "每个斑点及其相邻斑点（半径 = 1.1 × 样本内最近邻斑点距离）组成一个区域；区域特征 = 各斑点图块的局部输出平均，区域标签 = 这些斑点的伪 bulk，图像与标签覆盖同一范围"
-    labels: "log1p CP10k(程序) 与 log1p CP10k(泛 CAF)（分母为非腺泡非内分泌 UMI），各样本内 z 标准化；相对状态 = 两者之差"
-    caf_rich: "区域总 UMI ≥ 500，且泛 CAF CP10k 高于该样本中位数（各平台 UMI 深度不同，故用样本内标准）"
-    model: "I1 图块结构（两个非负局部输出：程序 p、泛 CAF c）；区域预测 = a·log(mean p) + b（两个头分别拟合 z 化的程序与泛 CAF 标签），状态 = 两头之差；超参数用 A2 在 TCGA 上选出的配置（lr 3e-4、wd 1e-2），训练 40 轮，3 个种子"
+      pretrain: "158 non-pancreatic samples (44 studies)"
+      pdac_test: "HEST pancreatic cancer NCBI569–572 (4) + PDAC Visium HD A1/D1/A2/D2 (4); TENX179 (= 10x) already used once, exploratory reference only"
+    sample_qc: ">= 7 of the 9 programme genes and all 4 pan-CAF genes in the expression matrix; >= 100 CAF-rich regions; otherwise excluded and recorded"
+    features: "HEST tiles (224 px, 0.5 µm/px, ~112 µm) → UNI2-h (same timm preprocessing as TCGA); PDAC Visium HD and TCGA keep the extracted 128 µm features (12% scale difference, reported as a limitation)"
+    region_definition: "each spot and its neighbours (radius = 1.1 × within-sample nearest-neighbour spot distance) form a region; region feature = mean local output of the spot tiles, region label = pseudo-bulk of those spots; image and label cover the same area"
+    labels: "log1p CP10k(programme) and log1p CP10k(pan-CAF) (denominator non-acinar non-endocrine UMI), z-scored within sample; relative state = their difference"
+    caf_rich: "region total UMI >= 500 and pan-CAF CP10k above the sample median (within-sample threshold because UMI depth differs by platform)"
+    model: "I1 tile architecture (two non-negative local outputs: programme p, pan-CAF c); region prediction = a·log(mean p) + b (two heads fit the z-scored programme and pan-CAF labels), state = difference of the heads; hyperparameters selected by A2 on TCGA (lr 3e-4, wd 1e-2), 40 epochs, 3 seeds"
     evaluation:
-      within_pretrain: "按研究分组 5 折（GroupKFold）；每个留出样本计算区域层面状态的 Spearman ρ，按器官汇总"
-      pdac_zero_shot: "用全部 158 个样本预训练，直接测 8 个胰腺癌样本（自有 HD 按 A5 的 150 µm 规则评估）"
-      pdac_finetune: "从预训练模型出发，在 8 个胰腺癌样本上留一病人微调（10 轮，lr 1e-4），测留出样本"
-      comparators: "同样样本上的 I1_bulk、I1_I2_mixed、B2 注意力（A5 已有结果 + HEST 胰腺样本补算）"
-      learning_curve: "预训练只用随机 5 / 10 / 20 / 全部研究（各 3 次），记录胰腺癌零样本中位 ρ"
-      patient_level: "预训练（及微调）模型作用于 TCGA / CPTAC 全部图块，病人状态 = log(mean p) − log(mean c)；报告与 bulk 状态的 Spearman / AUC，以及按 A7 规则的生存分析"
+      within_pretrain: "5-fold grouped by study (GroupKFold); region-level state Spearman ρ per held-out sample, summarised by organ"
+      pdac_zero_shot: "pretrain on all 158 samples, test directly on the 8 PDAC samples (PDAC Visium HD evaluated with the A5 150 µm rule)"
+      pdac_finetune: "from the pretrained model, leave-one-patient-out fine-tuning on the 8 PDAC samples (10 epochs, lr 1e-4), tested on the held-out sample"
+      comparators: "I1_bulk, I1_I2_mixed and B2 attention on the same samples (existing A5 results + HEST pancreatic samples added)"
+      learning_curve: "pretraining on random 5 / 10 / 20 / all studies (3 times each); median PDAC zero-shot ρ recorded"
+      patient_level: "pretrained (and fine-tuned) models applied to all TCGA / CPTAC tiles, patient state = log(mean p) − log(mean c); Spearman / AUC against bulk state and survival analysis under A7 rules reported"
     success:
-      zero_shot: "8 个胰腺癌样本中 ≥ 6 个 ρ ≥ 0.3，且中位 ρ 不低于 I1_bulk"
-      finetune: "中位 ρ 高于零样本"
-      patient_level: "CPTAC 状态 AUC 比 A2 最好结果（残差 0.64 / 减法 0.67）高 ≥ 0.03 才称为改进，否则如实报告持平"
-  A9_pdac_spatial_finetune_70:     # 2026-10-21 草案，待用户确认后冻结；确认前不提取特征、不训练
-    status: frozen_2026-10-21          # 用户确认；运行负载按用户要求调高（见 load）
+      zero_shot: "ρ >= 0.3 in >= 6 of the 8 PDAC samples and median ρ not below I1_bulk"
+      finetune: "median ρ higher than zero-shot"
+      patient_level: "CPTAC state AUC at least 0.03 above the best A2 result (residual 0.64 / subtraction 0.67) to be called an improvement; otherwise reported as equivalent"
+  A9_pdac_spatial_finetune_70:     # 2026-10-21 draft, fixed after confirmation; no feature extraction or training before then
+    status: frozen_2026-10-21          # confirmed; run load set as recorded under load
     data:
-      new: "/Volumes/INTENSO_BIG/PDAC_spatial_public：GSE274557 55 个（排除 2 个 PDX）、GSE327056 4 个、GSE211895 3 个"
-      existing: "自有 Visium HD 4 个（A1/D1/A2/D2）、HEST NCBI569–572 4 个"
-      exploratory_only: "TENX179（10x）"
-      untouched: "TCGA、CPTAC 不参与任何训练或选择，只做病人层面评估"
-    patient_grouping: "按患者分组（GSE274557 同一患者的原发与转移灶视为同一组；GSE327056 4 个样本视为同一患者；其余每个样本一名患者）"
-    features: "新样本按 HEST 的做法切图块：以每个斑点为中心、0.5 µm/px、224 px（约 112 µm），UNI2-h；与 A8 一致"
-    labels_and_regions: "与 A8 相同（斑点 + 邻近斑点、log1p CP10k、样本内 z 标准化、富含 CAF 区域按样本中位数）"
-    sample_qc: "与 A8 相同（程序基因 ≥ 7/9、泛 CAF 4/4、富含 CAF 区域 ≥ 100）；不达标的样本记录并排除"
-    model: "从 A8 的泛癌预训练模型（156 个样本，3 个种子）出发，在胰腺癌空间样本上微调 10 轮（lr 1e-4）；其余同 A8"
+      new: "/Volumes/INTENSO_BIG/PDAC_spatial_public: GSE274557 55 (2 PDX excluded), GSE327056 4, GSE211895 3"
+      existing: "PDAC Visium HD 4 (A1/D1/A2/D2), HEST NCBI569–572 4"
+      exploratory_only: "TENX179 (10x)"
+      untouched: "TCGA and CPTAC not used for any training or selection; patient-level evaluation only"
+    patient_grouping: "grouped by patient (primary and metastases of one GSE274557 patient form one group; the 4 GSE327056 samples treated as one patient; every other sample one patient)"
+    features: "new samples tiled as in HEST: centred on each spot, 0.5 µm/px, 224 px (~112 µm), UNI2-h; consistent with A8"
+    labels_and_regions: "as A8 (spot + neighbouring spots, log1p CP10k, within-sample z-score, CAF-rich regions by sample median)"
+    sample_qc: "as A8 (programme genes >= 7/9, pan-CAF 4/4, CAF-rich regions >= 100); failing samples recorded and excluded"
+    model: "from the A8 pan-cancer pretrained model (156 samples, 3 seeds), fine-tuned on PDAC spatial samples for 10 epochs (lr 1e-4); otherwise as A8"
     evaluation:
-      spatial_lopo: "留一患者微调与测试；报告每个样本 ρ，并按原发 / 转移、未治疗 / 治疗、数据来源分组；与 A8 的 8 样本微调在原来 8 个样本上直接比较"
-      patient_level: "用全部胰腺癌空间样本微调 → TCGA（146）与 CPTAC（135）的 Spearman、AUC、bootstrap 95% CI；与 A8 finetuned_all8 与 A2 B2 做配对 bootstrap 与 DeLong 检验"
-      prognosis: "按 A7 规则（单因素、年龄 + 分期多因素、TCGA + CPTAC 固定效应合并）"
-      ablation: "微调集合：(a) 只用自有 4 个 HD；(b) 只用原发灶（不含转移灶）；(c) 全部。比较 CPTAC AUC 与空间 ρ，回答自有数据与转移灶各自的贡献"
+      spatial_lopo: "leave-one-patient-out fine-tuning and testing; ρ per sample reported and grouped by primary / metastasis, untreated / treated and source; compared directly with the A8 8-sample fine-tuning on the original 8 samples"
+      patient_level: "fine-tune on all PDAC spatial samples → Spearman, AUC and bootstrap 95% CI in TCGA (146) and CPTAC (135); paired bootstrap and DeLong tests against A8 finetuned_all8 and A2 B2"
+      prognosis: "A7 rules (univariable, age + stage multivariable, TCGA + CPTAC fixed-effect pooling)"
+      ablation: "fine-tuning sets: (a) the 4 PDAC Visium HD sections only; (b) primary tumours only (no metastases); (c) all. CPTAC AUC and spatial ρ compared to assess the contribution of the Visium HD data and of metastases"
     success:
-      spatial: "原来 8 个样本的中位 ρ ≥ 0.42（不低于 A8 微调），且全部胰腺癌样本中 ≥ 70% 的 ρ ≥ 0.3"
-      patient_level: "CPTAC 状态（残差）AUC 点估计 ≥ 0.70，且不低于 A8 finetuned_all8；与 A2 B2 的差值报告 95% CI 与 DeLong p，不论是否显著"
-      prognosis: "次要：A7 合并 HR > 1 且 p < 0.05"
-    load: "用户先要求适当上压力（nice 10、8 线程、批量 64），随后要求降低 → 实际：特征提取（he_16）nice 19、2 线程、批量 32、批间暂停、负载 > 8 时暂停；微调（he_17）nice 19、2 线程，批量与暂停沿用 he_14（BATCH 256、每轮暂停 0.5 秒）（运行记录，不影响分析规则；2026-10-21 经 Codex T0 核对后更正）"
+      spatial: "median ρ >= 0.42 on the original 8 samples (not below A8 fine-tuning) and ρ >= 0.3 in >= 70% of all PDAC samples"
+      patient_level: "CPTAC state (residual) AUC point estimate >= 0.70 and not below A8 finetuned_all8; difference from A2 B2 reported with 95% CI and DeLong p regardless of significance"
+      prognosis: "secondary: A7 pooled HR > 1 and p < 0.05"
+    load: "feature extraction (he_16) nice 19, 2 threads, batches of 32, pauses between batches, pause while load > 8; fine-tuning (he_17) nice 19, 2 threads, batches and pauses as he_14 (BATCH 256, 0.5 s pause per epoch) (run record; does not affect analysis rules)"
   # ------------------------------------------------------------------------------------
-  # 2026-10-21 全文主线改为"CAF 状态与数量必须拆开测"（用户确认）。A10、A11 是为支撑这条主线追加的分析；
-  # 两者都是在看过 A5–A9 / fig2_meta 结果之后提出的，论文中须如实标为事后追加（post hoc）。
+  # 2026-10-21 the main line became 'CAF state and amount must be measured separately'. A10 and A11 were added to support it;
+  # both were proposed after seeing the A5–A9 / fig2_meta results and must be reported as post hoc in the paper.
   A10_bulk_vs_spatial_teacher:     # 2026-10-21 approved by user; augmented before execution
     status: frozen_2026-10-21
-    question: "在同一批胰腺癌空间切片上，用 bulk RNA 当老师（TCGA 训练）和用空间转录组当老师（泛癌空间预训练）的 H&E 模型，谁能读出 CAF 状态？"
-    slides: "A9 的全部 70 张（62 GEO + 4 HEST + 自有 4 HD；25 名患者，分组同 A9 修正后的规则）；10x（A6）只作探索性参考"
+    question: "on the same PDAC spatial sections, which H&E model reads out CAF state: one taught by bulk RNA (TCGA training) or one taught by spatial transcriptomics (pan-cancer spatial pretraining)?"
+    slides: "all 70 A9 sections (62 GEO + 4 HEST + 4 PDAC Visium HD; 25 patients, grouped by the corrected A9 rule); 10x (A6) exploratory reference only"
     arms:
-      S0_bulk_teacher: "I1_bulk：只用 TCGA bulk 训练，配置与 A5 / A8 完全相同（he_10 的 train_i1，无 HD，he_14 的 SEEDS 3 个种子，TCGA 图块统计量标准化）。权重保存，供以后复用"
-      S1_spatial_teacher_no_pdac: "泛癌空间预训练、零样本：只读 results/he/A9/models/pretrain_seed*.pt 与 feature_stats.pt（不重新训练、不改写），没见过任何胰腺癌空间标签"
-      S2_spatial_teacher_pdac: "A9 留一患者微调：直接读 results/he/A9/lopo_spatial.tsv（不重跑）"
-    evaluation_rule: "与 A8 / A9 完全相同：HEST / GEO 用斑点 + 邻域区域与 CAF-rich 规则，实测相对状态 = log1p CP10k 程序 − 泛 CAF（load_sample 的 rel）；自有 HD 用 A5 的 150 µm 规则（S0 直接取 A5/spatial.tsv 的 I1_bulk 150 µm，S1 用 he_14.eval_own）"
-    sanity: "S0 在 HEST 4 张上的 ρ 与 A8/pdac.tsv 的 I1_bulk (TCGA) 相差 ≤ 0.05；S1 在原来 8 张上与 A8 零样本相差 ≤ 0.05；不满足则先查原因再报告"
+      S0_bulk_teacher: "I1_bulk: trained on TCGA bulk only, configuration identical to A5 / A8 (train_i1 of he_10, no HD, 3 SEEDS of he_14, TCGA tile statistics for standardisation). Weights saved for reuse"
+      S1_spatial_teacher_no_pdac: "pan-cancer spatial pretraining, zero-shot: reads only results/he/A9/models/pretrain_seed*.pt and feature_stats.pt (no retraining or rewriting); never saw any PDAC spatial label"
+      S2_spatial_teacher_pdac: "A9 leave-one-patient-out fine-tuning: read directly from results/he/A9/lopo_spatial.tsv (not re-run)"
+    evaluation_rule: "identical to A8 / A9: HEST / GEO use spot + neighbourhood regions and the CAF-rich rule, measured relative state = log1p CP10k programme − pan-CAF (rel of load_sample); PDAC Visium HD uses the A5 150 µm rule (S0 from I1_bulk 150 µm in A5/spatial.tsv, S1 via he_14.eval_own)"
+    sanity: "S0 ρ on the 4 HEST sections within 0.05 of I1_bulk (TCGA) in A8/pdac.tsv; S1 on the original 8 sections within 0.05 of A8 zero-shot; if not, investigate before reporting"
     statistics:
-      unit: "患者（同一患者的多张切片先取 ρ 均值），共 25 名"
-      primary: "S1 − S0：患者层面 Wilcoxon 符号秩检验（双侧）+ 按患者的聚类 bootstrap（2000 次）给患者配对差中位数的 95% CI"
-      secondary: "S2 − S0、S2 − S1；按数据来源、原发 / 转移、治疗与否分组描述；ρ ≥ 0.3 的切片比例"
-    success: "主要：患者配对差 Δρ=S1−S0 的中位数 > 0 且双侧 Wilcoxon p < 0.05。若不满足，如实报告（这会削弱图 3→图 4 的转折，需重新讨论措辞）"
+      unit: "patient (ρ of several sections of one patient averaged first), 25 patients"
+      primary: "S1 − S0: patient-level two-sided Wilcoxon signed-rank test + patient cluster bootstrap (2000) 95% CI of the median paired difference"
+      secondary: "S2 − S0, S2 − S1; described by source, primary / metastasis and treatment; fraction of sections with ρ >= 0.3"
+    success: "primary: median paired Δρ = S1 − S0 > 0 with two-sided Wilcoxon p < 0.05. If not met, reported as is (this would weaken the bulk-to-spatial transition and the wording would need revisiting)"
     outputs: "results/he/A10/{slide_rho.tsv, patient_rho.tsv, paired_tests.tsv, models/}"
-    load: "nice 19、2 线程；S0 训练沿用 A5 配置；其余只做推理"
-    interpretation: "比较训练方案的迁移表现；癌种、数据规模、训练目标、模型头与预算不同，不能把差异单独归因于监督方式。pan-CAF 为分子丰度代理，不等于直接细胞计数。"
-    paired_rules: "同一切片所有组严格共享区域/标签/CAF-rich mask；患者内等权平均切片 rho。undefined rho 不填零，保存原因并对三组共同完整患者作主要比较；主要对比 S1-S0，次要对比不作验证性结论。Wilcoxon 双侧、zero_method=wilcox、method=approx、并列值保留；全零差 p=1。患者等权 bootstrap 2000 次 percentile CI，seed=20261021。"
-    sanity_policy: "正式效应比较前保存 sanity 表；任何绝对差 >0.05 或非有限值均停止，不调整模型迎合结果。S0 自有 HD 用本次同一三种子模型推理，并与 A5 核对（容差0.05），不拼接历史模型实例。"
-    runtime: "使用运行日期子目录；S0 80轮、种子0/1/2、每步最多1024图块、原A5优化不变，步间暂停0.01秒、每轮暂停0.5秒；推理分块256。负载>8暂停，2线程，nice19。10x三组无法匹配完整LOPO设计，只作已存A6结果参考，不进入主要检验。"
+    load: "nice 19, 2 threads; S0 training uses the A5 configuration; everything else is inference only"
+    interpretation: "compares transfer of training schemes; cancer types, data size, training targets, model heads and budgets differ, so differences cannot be attributed to the supervision type alone. pan-CAF is a molecular abundance proxy, not a direct cell count."
+    paired_rules: "all arms share regions/labels/CAF-rich masks within each section; section rho averaged equally within patients. Undefined rho not set to zero; reasons saved, and the primary comparison uses patients complete in all three arms; primary contrast S1-S0, secondary contrasts not confirmatory. Wilcoxon two-sided, zero_method=wilcox, method=approx, ties kept; all-zero differences p=1. Patient-equal bootstrap 2000 percentile CI, seed=20261021."
+    sanity_policy: "sanity table saved before the formal comparison; any absolute difference > 0.05 or non-finite value stops the run; models are not adjusted to fit results. S0 on PDAC Visium HD uses the same three-seed models and is checked against A5 (tolerance 0.05); historical model instances are not mixed in."
+    runtime: "dated run subdirectory; S0 80 epochs, seeds 0/1/2, up to 1024 tiles per step, A5 optimiser unchanged, 0.01 s pause per step, 0.5 s per epoch; inference in chunks of 256. Pause while load > 8, 2 threads, nice 19. The 10x section cannot match the full LOPO design for all three arms; the stored A6 result is a reference only and not part of the primary test."
     paths:
       a9: results/he/A9
       a8: results/he/A8
       a5: results/he/A5
       hd: results/he/hd
       output: results/he/A10
-    authorization: "用户明确授权补齐规则后立即冻结并运行；本次为事后追加。"
-  A11_state_within_abundance_strata:   # 2026-10-21 草案，待用户确认后冻结；确认前不计算任何生存关联
+    authorization: "rules completed, then fixed and run immediately with explicit approval; this is a post hoc addition."
+  A11_state_within_abundance_strata:   # 2026-10-21 draft, fixed after confirmation; no survival association computed before then
     status: frozen_2026-10-21
-    question: "CAF 状态的预后意义是否被 CAF 数量掩盖：在同一模型里同时放入状态与数量、以及在数量高 / 低两层中分别看，状态是否都与不良预后相关？"
-    cohorts: "与 fig2_meta 相同的 8 个队列（TCGA、CPTAC、GSE28735、GSE62452、GSE57495、GSE71729、GSE85916、GSE21501），同样的样本、得分与 OS 定义；读取 results/fig2/ 下已有的 *_scores.tsv 与 *_clinical.tsv"
-    variables: "状态 = program_rel；数量 = pan_CAF（均为队列内 z 标准化）；同样对 Moffitt_activated_rel、Dominguez_LRRC15_rel 重复（与各自同一个 pan_CAF）"
+    question: "is the prognostic meaning of CAF state masked by CAF amount: with state and amount in the same model, and separately within high / low amount strata, is state associated with poor prognosis?"
+    cohorts: "the same 8 cohorts as fig2_meta (TCGA, CPTAC, GSE28735, GSE62452, GSE57495, GSE71729, GSE85916, GSE21501), same samples, scores and OS definitions; reads existing *_scores.tsv and *_clinical.tsv under results/fig2/"
+    variables: "state = program_rel; amount = pan_CAF (both z-scored within cohort); repeated for Moffitt_activated_rel and Dominguez_LRRC15_rel (each with the same pan_CAF)"
     models:
-      primary_joint: "每个队列 Cox：OS ~ 状态 + 数量；合并状态的 log HR（REML 随机效应，同时报告固定效应与 I²）"
-      strata: "每个队列内按 pan_CAF 中位数分为数量高 / 低两层，各层 Cox：OS ~ 状态；按层合并"
-      interaction: "每个队列 Cox：OS ~ 状态 × 数量；合并交互项"
-      masking_check: "同一联合模型中数量本身的合并 HR；以及原始程序得分（program）的合并 HR，用于说明原始得分为何不显著"
-      descriptive: "状态高 / 低 × 数量高 / 低 四组的 KM 图（以队列分层的 Cox 给组间 HR），只作描述"
-      sensitivity: "排除 GSE71729（Moffitt 发现队列）；secondary 模型加 ESTIMATE 基质评分 + Moffitt basal−classical（同 fig2_meta）"
-    success: "主要：联合模型中状态的合并 HR > 1 且 p < 0.05。次要：两层中状态的合并 HR 均 > 1（方向一致），交互项 p 如实报告；若交互显著，按层分别下结论"
+      primary_joint: "per-cohort Cox: OS ~ state + amount; pooled log HR of state (REML random effects, fixed effect and I² also reported)"
+      strata: "within each cohort, split at the pan_CAF median into high / low amount; per-stratum Cox: OS ~ state; pooled by stratum"
+      interaction: "per-cohort Cox: OS ~ state × amount; interaction term pooled"
+      masking_check: "pooled HR of amount itself in the joint model, and pooled HR of the raw programme score (program), to explain why the raw score is not significant"
+      descriptive: "KM plots of the four state high / low × amount high / low groups (between-group HR from Cox stratified by cohort), descriptive only"
+      sensitivity: "exclude GSE71729 (Moffitt discovery cohort); secondary model adds ESTIMATE stromal score + Moffitt basal−classical (as fig2_meta)"
+    success: "primary: pooled HR of state in the joint model > 1 with p < 0.05. Secondary: pooled HR of state > 1 in both strata (same direction), interaction p reported as is; if the interaction is significant, conclusions are drawn per stratum"
     outputs: "results/fig2/A11/{per_cohort.tsv, pooled.tsv, km_*.pdf}"
-    script: "fig2/fig2_08_state_within_abundance.R（R，从项目根目录运行）"
+    script: "fig2/fig2_08_state_within_abundance.R (R, run from the project root)"
 
-    operational_rules: "按原meta纳入OS_time>0且OS为0/1的患者；在队列内、分层前z化，分层后不重新z化。pan_CAF等于队列中位数者归低组；状态高低按全队列中位数，同值归低。模型逐个完整病例，保存纳入mask及排除原因。无事件/恒定变量/不收敛或无限系数模型列明并不合并，不按p值筛队列；低事件数仅标记不自动剔除。"
-    diagnostics: "每队列保存PH检验、事件数和系数/相关性；显著PH违背不静默修复，作为限制报告。交互用连续量，分层仅描述。program_rel+pan_CAF与program+pan_CAF为重参数化，不能据此证明数量抵消机制。"
-    multiplicity: "唯一主要检验=program_rel联合模型随机效应HR；M/D、分层、交互、原始评分、排除GSE71729与协变量模型为次要探索性，不以一层显著另一层不显著推断异质性。"
-    descriptive_rule: "KM分别按队列出图；联合四组HR用strata(cohort)的Cox。次要调整联合模型含状态、pan_CAF、ESTIMATE基质、basal-classical；GEO ESTIMATE按原fig2_06重算并仅保存在本次目录。"
-    runtime: "运行日期子目录，nice19、2线程；seed=20261021；R survival/metafor/estimate。"
+    operational_rules: "patients included as in the original meta-analysis (OS_time > 0 and OS 0/1); z-scored within cohort before stratification, not re-scored after. pan_CAF equal to the cohort median goes to the low stratum; state high/low by the whole-cohort median, ties low. Models use complete cases, with inclusion masks and exclusion reasons saved. Models with no events/constant variables/non-convergence or infinite coefficients are listed and not pooled; cohorts are not selected by p value; low event counts are flagged, not removed."
+    diagnostics: "per cohort, PH tests, event counts and coefficients/correlations saved; significant PH violations are not silently fixed and are reported as limitations. Interaction uses continuous variables; strata are descriptive only. program_rel + pan_CAF and program + pan_CAF are reparameterisations and cannot prove an amount-cancellation mechanism."
+    multiplicity: "the only primary test = random-effects HR of program_rel in the joint model; M/D, strata, interaction, raw scores, excluding GSE71729 and covariate models are secondary/exploratory; heterogeneity is not inferred from one stratum being significant and the other not."
+    descriptive_rule: "KM plotted per cohort; the four-group HR from Cox with strata(cohort). The secondary adjusted joint model includes state, pan_CAF, ESTIMATE stroma and basal-classical; GEO ESTIMATE recomputed as in fig2_06 and saved only in this run directory."
+    runtime: "dated run subdirectory, nice 19, 2 threads; seed=20261021; R survival/metafor/estimate."
     paths:
       source: results/fig2
       output: results/fig2/A11
-    authorization: "用户明确授权补齐规则后立即冻结并运行；本次为事后追加。"
+    authorization: "rules completed, then fixed and run immediately with explicit approval; this is a post hoc addition."
   A12_a10_patch_scale_robustness:  # 2026-10-21 user-approved 2x2 scale sensitivity, frozen before extraction/inference.
     status: frozen_2026-10-21
-    reason: "A10的bulk训练使用128 µm，空间预训练使用112 µm；在公开切片评估中存在输入尺度不匹配，需要同输入尺度比较。平台/来源亦不同，来源对照只能提示混杂，不能证明尺度因果解释。"
-    design: "公开66张（62 GEO+4 HEST）：S0 bulk / S1空间零样本 × 输入112/128 µm，四格比较。112用原缓存、128新提真实视野；同一128特征供两种模型使用，无训练。自有HD4张只有原128 µm输入，作为固定锚点；不得称其存在112 µm重复条件。"
-    primary: "全部70张统一128 µm输入的S1_128−S0_128：先患者内等权平均切片rho，再取25名患者配对差中位数；中位差>0且双侧Wilcoxon p<0.05为通过。通过仅称本次尺度稳健，不消除训练癌种/规模/目标/模型头的混杂。"
-    secondary: "公开66张（21患者）同128 µm的S1−S0；原112的S1−S0；各自训练尺度S1_112−S0_128；S0_128−S0_112、S1_128−S1_112及两种尺度效应差；按来源/组织描述。不用次要显著性替换主要终点。S2仅保留历史参考，不扩充训练。"
-    statistics: "与A10一致：患者内切片rho均值，患者配对差中位数；双侧Wilcoxon(method=approx,zero_method=wilcox)，全零差p=1；患者等权bootstrap2000次percentile95%CI，seed20261021。共同完整患者，非有限rho不填0，不按模型效果删样本。"
-    evaluation: "完全复用A10每样本原区域索引、相对状态rel、CAF-rich mask；128只替换特征，原坐标/计数/条码/标签/邻域不变。所有组区域索引、标签、mask逐项核对。自有HD原A10结果固定。"
-    geometry: "GEO复用he_16读图/原positions与比例换算，以原barcode顺序恢复未舍入图像中心，round后必须逐项等于旧coords。HEST旧h5 coords是图块左上角，图像中心=coords+patch_size_src/2，核对barcode对应obsm/spatial差≤1像素；标签仍保留旧coords。128只扩大视野，不平移中心。"
-    extraction: "UNI2-h已有本地权重，只读离线加载，原timm预处理。GEO保留原he_16边界裁切及resize224方法；HEST按metadata原图µm/px裁切后resize224。保留边界标记不按表现删除。特征float16，1536维，原缓存不覆盖；编码器eval/inference_mode，无重新训练或标准化拟合。"
-    sanity: "在看A12正式比较前：每个GEO来源及每个HEST样本固定等距8个斑点重建112 µm图块，编码特征与旧缓存cosine中位≥0.98、最小≥0.90；原112/旧HD推理rho与A10绝对差≤0.001；任何失败停正式比较并调查、记录，不能按最终rho挑预处理。128所有样本region和mask同A10且n_regions一致。"
+    reason: "A10 bulk training used 128 µm inputs and spatial pretraining 112 µm, so the public-section evaluation had mismatched input scales and needs a same-scale comparison. Platforms/sources also differ, so source contrasts can only suggest confounding and cannot prove a causal scale explanation."
+    design: "66 public sections (62 GEO + 4 HEST): S0 bulk / S1 spatial zero-shot × input 112/128 µm, a 2×2 comparison. 112 uses the original cache, 128 re-extracts true fields; the same 128 features serve both models, no training. The 4 PDAC Visium HD sections only have the original 128 µm input and act as a fixed anchor; they must not be described as having a 112 µm replicate condition."
+    primary: "S1_128 − S0_128 across all 70 sections at a common 128 µm input: section rho averaged equally within patients, then the median paired difference over 25 patients; median difference > 0 with two-sided Wilcoxon p < 0.05 passes. Passing only indicates robustness to this scale and does not remove confounding by training cancer type/size/target/model head."
+    secondary: "S1 − S0 at 128 µm in the 66 public sections (21 patients); original 112 S1 − S0; each at its training scale S1_112 − S0_128; S0_128 − S0_112, S1_128 − S1_112 and the difference of the two scale effects; described by source/tissue. Secondary significance never replaces the primary endpoint. S2 kept as a historical reference only, no additional training."
+    statistics: "as A10: section rho averaged within patients, median paired difference over patients; two-sided Wilcoxon (method=approx, zero_method=wilcox), all-zero differences p=1; patient-equal bootstrap 2000 percentile 95% CI, seed 20261021. Patients complete in all arms; non-finite rho not set to 0; no samples removed based on model performance."
+    evaluation: "reuses the A10 per-sample region index, relative state rel and CAF-rich mask exactly; 128 only replaces features, with coordinates/counts/barcodes/labels/neighbourhoods unchanged. Region indices, labels and masks of all arms checked item by item. Original A10 results for PDAC Visium HD fixed."
+    geometry: "GEO reuses he_16 image reading/original positions and scaling; unrounded image centres recovered in original barcode order must equal the old coords after rounding. Old HEST h5 coords are tile top-left corners, so image centre = coords + patch_size_src/2, checked against obsm/spatial for each barcode (<= 1 pixel); labels keep the old coords. 128 only enlarges the field and does not shift the centre."
+    extraction: "UNI2-h loaded offline read-only from local weights with the original timm preprocessing. GEO keeps the original he_16 border cropping and resize-to-224; HEST cropped by metadata µm/px then resized to 224. Border flags kept, never used to drop by performance. Features float16, 1536 dimensions, original cache not overwritten; encoder in eval/inference_mode, no retraining or refitting of standardisation."
+    sanity: "before the formal A12 comparison: 8 evenly spaced spots per GEO source and per HEST sample rebuilt as 112 µm tiles, cosine of encoded features with the old cache median >= 0.98 and minimum >= 0.90; original 112/old HD inference rho within 0.001 of A10; any failure stops the formal comparison for investigation and recording; preprocessing is never chosen by final rho. For 128, regions and masks of every sample match A10 with identical n_regions."
     paths:
       a10: results/he/A10/2026-10-21_run01
       a9: results/he/A9
@@ -552,8 +552,8 @@ he_amendments:
       hest_wsis: /Volumes/INTENSO/HEST1k/wsis
       uni_cache: ~/.cache/huggingface/hub/models--MahmoodLab--UNI2-h
       output: results/he/A12
-    load: "nice19，2线程，batch32，批间0.05秒，负载>8暂停15秒；OOM仅降低批量并记录；分块特征检查点恢复，不改变模型或取样。MPS任务顺序执行。"
-    authorization: "2026-10-21 用户明确：采用补齐后的A12，优先级高于继续增加模型，你做啊。事后追加尺度敏感性，不称前瞻预注册。无下载。"
+    load: "nice 19, 2 threads, batch 32, 0.05 s between batches, 15 s pause while load > 8; on OOM only the batch size is reduced and recorded; chunked feature checkpoints for resuming, without changing the model or sampling. MPS jobs run sequentially."
+    authorization: "2026-10-21 explicit approval to adopt the completed A12 with priority over adding models. A post hoc scale sensitivity analysis, not described as prospectively preregistered. No downloads."
 
   # A13 frozen after explicit user start authorization; earlier amendments unchanged.
   A13_local_vs_aggregated_supervision:
@@ -561,7 +561,7 @@ he_amendments:
     frozen_at: '2026-10-22T23:38:41.083582+02:00'
     training_authorized: true
     authorization:
-      user_quote: 那我们开始运行
+      user_quote: let us start the run
       date: '2026-10-22'
       meaning: User direct start instruction supersedes prior training HOLD; execute
         final protocol v1.
@@ -710,51 +710,51 @@ he_amendments:
       results/he/A13_preflight/2026-10-22_run01/units_audit.tsv: 022263c2f92fc50f5e4ec80928f3138e7cf923a0e3178f6b666122150853f9af
     parent_config_original_sha256: 734dc17645674aa4087fb093534fb7357927e6d1523ca019434f33a74f9f97d2
     implementation_checks_sha256: 521729786c5a6295d4224bf3617e1901e678cd89ff06eedcba0b7d0124e11a9a
-  A14_domain_shift_exploratory:   # 2026-10-27 草案（用户观察：自有 Visium HD FFPE 外观与 TCGA 相似，公开切片不像 → 效果差）；待用户确认后冻结
+  A14_domain_shift_exploratory:   # 2026-10-27 draft (observation: the FFPE PDAC Visium HD sections resemble TCGA in appearance while public sections do not, and perform worse); fixed after confirmation
     status: frozen_2026-10-27
-    nature: "事后追加的探索性分析（看过 A10/A12 按来源的 ρ 之后提出），论文中如实标注"
-    question: "切片的 H&E 外观越不像 TCGA 训练切片，bulk 训练模型（S0）的局部读取 ρ 是否越低？空间训练模型（S1，HEST 多来源预训练）是否对此不那么敏感？"
-    slides: "A12 的 70 张（公开 66 张用 A12 的 128 µm 特征；自有 HD 4 张用 results/he/hd 的 128 µm 特征），25 名患者，分组同 A9"
+    nature: "post hoc exploratory analysis (proposed after seeing A10/A12 ρ by source), labelled as such in the paper"
+    question: "the less a section's H&E appearance resembles the TCGA training slides, is the local readout ρ of the bulk-trained model (S0) lower? Is the spatially trained model (S1, multi-source HEST pretraining) less sensitive to this?"
+    slides: "the 70 A12 sections (66 public with A12 128 µm features; 4 PDAC Visium HD with the 128 µm features in results/he/hd), 25 patients, grouped as A9"
     domain_metric:
-      primary: "UNI2-h 特征域距离：TCGA 训练图块（results/he/cache_own，全部 146 名患者）拟合 PCA（50 维，只用 TCGA），每张切片 = 其全部有效图块在 PCA 空间中到 TCGA 图块均值的 Mahalanobis 距离的中位数。只用图像特征计算，计算时不读取任何 ρ"
-      descriptive: "颜色：每张切片组织图块的平均光密度及 Macenko H / E 染色向量与 TCGA 参考的夹角；样本类型（FFPE / 冰冻）"
+      primary: "UNI2-h feature-domain distance: PCA (50 dimensions, TCGA only) fitted on TCGA training tiles (results/he/cache_own, all 146 patients); per section = median Mahalanobis distance of all valid tiles to the TCGA tile mean in PCA space. Computed from image features only, without reading any ρ"
+      descriptive: "colour: mean optical density of tissue tiles per section and the angle between Macenko H / E stain vectors and the TCGA reference; sample type (FFPE / frozen)"
     statistics:
-      unit: "患者（同一患者多张切片先取距离与 ρ 的均值），25 名"
-      primary: "Spearman(域距离, S0_128 ρ)，双侧 p；预期为负"
-      secondary: "Spearman(域距离, S1_128 ρ)；两者相关系数之差的患者 bootstrap（2000 次，seed 20261021）95% CI；按来源 / 样本类型描述"
-    success: "主要：S0 的 Spearman ρ < 0 且 p < 0.05 → 支持'外观偏离 TCGA 时 bulk 模型变差'。不论结果，都写明域距离与来源、样本类型高度混杂，只能作为机制线索，不能证明因果"
-    not_included: "染色归一化后重提特征再评估（干预性检验）不在 A14 内；视 A14 结果另议"
-    outputs: "results/he/A14/<运行日期>/{slide_domain.tsv, patient_domain.tsv, correlations.tsv, figures/}"
-    load: "nice 19、2 线程；只读已有特征，预计数分钟"
-  A15_stain_normalisation_intervention:   # 2026-10-27 草案（A14 的主要指标没有对准用户的问题：用户问的是染色 / 清晰度，A14 量的是 UNI2-h 整体特征距离）；待用户确认后冻结
+      unit: "patient (distance and ρ of several sections averaged first), 25 patients"
+      primary: "Spearman(domain distance, S0_128 ρ), two-sided p; expected negative"
+      secondary: "Spearman(domain distance, S1_128 ρ); patient bootstrap (2000, seed 20261021) 95% CI of the difference between the two correlations; described by source / sample type"
+    success: "primary: S0 Spearman ρ < 0 with p < 0.05 → supports 'the bulk model degrades when appearance departs from TCGA'. Regardless of the result, domain distance is strongly confounded with source and sample type and can only be a mechanistic hint, not proof of causation"
+    not_included: "re-extraction after stain normalisation (interventional test) is not part of A14; to be decided after A14"
+    outputs: "results/he/A14/<run date>/{slide_domain.tsv, patient_domain.tsv, correlations.tsv, figures/}"
+    load: "nice 19, 2 threads; reads existing features only, a few minutes"
+  A15_stain_normalisation_intervention:   # 2026-10-27 draft (the A14 primary metric did not target the question asked, which was about staining / sharpness; A14 measured overall UNI2-h feature distance); fixed after confirmation
     status: frozen_2026-10-27
-    nature: "事后追加；A14 的冻结结果原样保留并在论文中一起报告，A15 不替换 A14"
-    question: "把公开切片的染色统一成 TCGA 风格后，bulk 训练模型（S0）的局部读取 ρ 是否提高？（直接干预检验，而不是再做一次相关）"
-    reference: "TCGA 参考染色：从 A3 训练用的 TCGA 诊断切片（/Volumes/INTENSO/TCGA_PAAD_svs，只读）按固定种子 20261027 随机取 20 名训练患者 × 每人 10 个组织图块，估计 Macenko H/E 染色矩阵与 99% 最大浓度；参考在读取任何 ρ 之前保存并记录哈希"
-    intervention: "对 66 张公开切片（A12 同一斑点、同一 128 µm 视野）先做 Macenko 归一化到 TCGA 参考，再缩放到 224 px、UNI2-h（与 A12 完全相同的预处理）；S0 用 A10 已存的三个权重、S1 用 A9 预训练权重，只读推理；区域 / 标签 / CAF-rich mask 与 A12 逐项相同。自有 HD 4 张不处理（作为未改动的参照）"
+    nature: "post hoc; the fixed A14 results are kept unchanged and reported together in the paper; A15 does not replace A14"
+    question: "after harmonising the staining of public sections to TCGA style, does the local readout ρ of the bulk-trained model (S0) improve? (a direct interventional test rather than another correlation)"
+    reference: "TCGA reference stain: from the TCGA diagnostic slides used in A3 training (/Volumes/INTENSO/TCGA_PAAD_svs, read only), 20 training patients × 10 tissue tiles each drawn with fixed seed 20261027 to estimate the Macenko H/E stain matrix and 99% maximum concentration; the reference is saved and hashed before reading any ρ"
+    intervention: "the 66 public sections (same spots and 128 µm fields as A12) Macenko-normalised to the TCGA reference, then resized to 224 px and encoded with UNI2-h (preprocessing identical to A12); S0 uses the three stored A10 weights and S1 the A9 pretrained weights, inference only; regions / labels / CAF-rich masks identical to A12. The 4 PDAC Visium HD sections are not processed (unchanged reference)"
     statistics:
-      unit: "患者（公开 66 张切片对应 21 名患者），切片 ρ 先在患者内平均"
-      primary: "S0_norm − S0_orig（S0_orig = A12 的 S0_128）：患者配对 Δρ 中位数，双侧 Wilcoxon（approx），患者 bootstrap 2000 次 95% CI，seed 20261021"
-      secondary: "S1_norm − S1_orig；按来源（重点 GSE211895、GSE327056）与样本类型描述；归一化后的 S1 − S0"
-    image_metrics: "只量染色与清晰度，不用任何深度特征：染色差异 = 各切片组织图块的 Macenko H、E 染色向量与 TCGA 参考向量的夹角之和（越小越像 TCGA）；清晰度 = 0.5 µm/px 下组织图块 Laplacian 方差的中位数（越大越清晰）。全部在读取任何 ρ 之前算完并保存哈希"
-    correlation_tests: "用户的原问题：25 名患者中，Spearman(染色差异, S0 ρ)（预期为负）与 Spearman(清晰度, S0 ρ)（预期为正），双侧 p；对 S1 同样计算作对照"
-    success: "主要（干预）：S0 的配对 Δρ 中位数 > 0 且 p < 0.05 → 染色差异是 bulk 模型在公开切片上变差的原因之一。相关检验：染色差异与 S0 ρ 负相关、清晰度与 S0 ρ 正相关（各自 p < 0.05）作为支持证据。未通过则如实报告"
-    outputs: "results/he/A15/<运行日期>/（归一化特征另存，不覆盖 A12）"
-    load: "nice 19、2 线程、批量 32、批间暂停、负载 > 8 时暂停（同 A12），预计 2–3 小时"
+      unit: "patient (66 public sections from 21 patients); section ρ averaged within patient first"
+      primary: "S0_norm − S0_orig (S0_orig = A12 S0_128): median patient-paired Δρ, two-sided Wilcoxon (approx), patient bootstrap 2000 95% CI, seed 20261021"
+      secondary: "S1_norm − S1_orig; described by source (notably GSE211895, GSE327056) and sample type; S1 − S0 after normalisation"
+    image_metrics: "staining and sharpness only, no deep features: stain difference = sum of the angles between each section's Macenko H and E stain vectors of tissue tiles and the TCGA reference vectors (smaller = more TCGA-like); sharpness = median Laplacian variance of tissue tiles at 0.5 µm/px (larger = sharper). All computed and hashed before reading any ρ"
+    correlation_tests: "the original question: across 25 patients, Spearman(stain difference, S0 ρ) (expected negative) and Spearman(sharpness, S0 ρ) (expected positive), two-sided p; computed for S1 as a comparison"
+    success: "primary (intervention): median paired Δρ of S0 > 0 with p < 0.05 → staining differences are one reason the bulk model degrades on public sections. Correlation tests: stain difference negatively and sharpness positively correlated with S0 ρ (each p < 0.05) as supporting evidence. If not met, reported as is"
+    outputs: "results/he/A15/<run date>/ (normalised features stored separately, A12 not overwritten)"
+    load: "nice 19, 2 threads, batch 32, pauses between batches, pause while load > 8 (as A12), about 2–3 hours"
 
-  A16_geo_true_scale:   # 2026-10-28 用户确认（"确认A16，按65µm重新提取公开切片特征"）；事后追加，不替换 A9–A15 任何冻结结果
+  A16_geo_true_scale:   # confirmed 2026-10-28 (re-extract public section features under the 65 µm convention); post hoc, does not replace any fixed A9–A15 result
     status: frozen_2026-10-28
-    reason: "主线 he_16 / A12 对 62 张 GEO 公开切片用 µm/px = 55 / spot_diameter_fullres / ratio；Space Ranger 的 spot_diameter_fullres 对应 65 µm（SR 支线 2026-10-27 已更正，docs/GEO_SCALE_CONVENTION_2026-10-27.md）。按旧口径相邻斑点中心距为 84.5 µm，而 Visium 设计为 100 µm：公开切片的“112 / 128 µm”视野实际约 132 / 151 µm，比 TCGA 训练用的 128 µm 大约 18%。HEST（metadata 像素尺寸）与自有 HD（Space Ranger µm/px）不受影响。"
-    question: "按正确物理尺度重新提取后，bulk 模型（S0）在公开切片上的局部读取是否提高？即尺度不匹配是否是 bulk 模型迁移困难的原因之一。"
-    scope: "62 张 GEO 切片重新提取；4 张 HEST 与 4 张自有 HD 沿用原特征（尺度本来正确）。区域索引、相对状态、CAF-rich mask、邻域定义（像素口径）与 A10/A12 逐项相同。"
-    geometry: "µm/px = 65 / spot_diameter_fullres / ratio（= 旧值 × 65/55）；中心、条码、读图与 A12 完全相同。预检：每张 GEO 切片按新 µm/px 计算的组织内斑点最近邻中位距须在 100 ± 2 µm，任一失败即停止并报告（GEO_SCALE_CONVENTION 中 3 份纯 hires 样本的邻距例外不在本集合内；若出现照实记录，不改标尺）。另按旧 µm/px 重建 112 µm 图块 8 个 / 来源，与原缓存 cosine 中位 ≥ 0.98、最小 ≥ 0.90，证明除 µm/px 外流程不变。"
-    extraction: "UNI2-h 只读离线；每张图读一次，同时裁真实 112 µm 与真实 128 µm 两种视野，resize 224，与 A12 相同预处理；特征 float16 另存，不覆盖 A9/A12。"
-    inference: "只读推理，不训练：S0 = A10 bulk 三个权重；S1 = A9 预训练三个权重；两种尺度都推理（S0 训练尺度 128 µm，S1 训练尺度 112 µm）。S2（留一患者微调）本修订不重训；只有主要结果显示尺度有实质影响时，另行提出是否重训。"
+    reason: "he_16 / A12 used µm/px = 55 / spot_diameter_fullres / ratio for the 62 public GEO sections, but Space Ranger spot_diameter_fullres corresponds to 65 µm (corrected 2026-10-27). Under the old convention the spot centre pitch is 84.5 µm whereas Visium is designed for 100 µm: the nominal 112 / 128 µm public fields were actually ~132 / 151 µm, about 18% larger than the 128 µm used for TCGA training. HEST (metadata pixel size) and PDAC Visium HD (Space Ranger µm/px) are unaffected."
+    question: "after re-extraction at the correct physical scale, does the local readout of the bulk model (S0) on public sections improve, i.e. is scale mismatch one reason for its poor transfer?"
+    scope: "the 62 GEO sections re-extracted; the 4 HEST and 4 PDAC Visium HD sections keep their original features (scale already correct). Region indices, relative state, CAF-rich masks and neighbourhood definitions (in pixels) identical to A10/A12."
+    geometry: "µm/px = 65 / spot_diameter_fullres / ratio (= old value × 65/55); centres, barcodes and image reading identical to A12. Preflight: for each GEO section, the median nearest-neighbour distance of in-tissue spots at the new µm/px must be 100 ± 2 µm; any failure stops and is reported (the pitch exceptions of three hires-only samples are outside this set; if any occur they are recorded as is without changing the scale). In addition, 8 tiles per source rebuilt at 112 µm with the old µm/px must have cosine with the original cache median >= 0.98 and minimum >= 0.90, showing that only µm/px changed."
+    extraction: "UNI2-h offline read-only; each image read once and cropped at true 112 µm and true 128 µm, resized to 224 with the A12 preprocessing; features float16 stored separately, A9/A12 not overwritten."
+    inference: "inference only, no training: S0 = the three A10 bulk weights; S1 = the three A9 pretrained weights; both scales inferred (S0 trained at 128 µm, S1 at 112 µm). S2 (leave-one-patient-out fine-tuning) is not retrained in this amendment; retraining would be proposed separately only if the primary result showed a substantial scale effect."
     statistics:
-      unit: "患者；切片 ρ 先在患者内等权平均；双侧 Wilcoxon(approx, zero_method=wilcox)；患者 bootstrap 2000 次 percentile 95% CI，seed 20261021（同 A12）"
-      primary: "公开 21 名患者：S0_true128 − S0_old128（old = A12 的 S0_128，实际约 151 µm）患者配对 Δρ 中位数"
-      secondary: "S1_true112 − S1_old112（old = A10/A12 S1_112，实际约 132 µm）；全部 25 名患者各自训练尺度下 S1_true112 − S0_true128 与同尺度 S1_true128 − S0_true128（HEST / 自有 HD 用原值）；按来源 / 组织描述"
-    success: "主要：中位 Δρ > 0 且 p < 0.05 → 尺度不匹配是 bulk 模型迁移变差的原因之一。未通过则如实报告为“该尺度误差对局部读取影响不大”。不论结果，图中公开切片的比例尺与 µm/px 一律按 65 µm 口径改正（仅显示）。"
+      unit: "patient; section ρ averaged equally within patient; two-sided Wilcoxon (approx, zero_method=wilcox); patient bootstrap 2000 percentile 95% CI, seed 20261021 (as A12)"
+      primary: "21 public patients: median patient-paired Δρ of S0_true128 − S0_old128 (old = A12 S0_128, actually ~151 µm)"
+      secondary: "S1_true112 − S1_old112 (old = A10/A12 S1_112, actually ~132 µm); across all 25 patients, S1_true112 − S0_true128 at each training scale and S1_true128 − S0_true128 at the same scale (HEST / PDAC Visium HD with original values); described by source / tissue"
+    success: "primary: median Δρ > 0 with p < 0.05 → scale mismatch is one reason the bulk model transfers poorly. If not met, reported as 'this scale error has little effect on the local readout'. Regardless of the result, scale bars and µm/px of public sections in figures are corrected to the 65 µm convention (display only)."
     paths:
       a12: results/he/A12/2026-10-21_run01
       a10: results/he/A10/2026-10-21_run01
@@ -762,20 +762,20 @@ he_amendments:
       geo_raw: /Volumes/INTENSO_BIG/PDAC_spatial_public
       uni_cache: ~/.cache/huggingface/hub/models--MahmoodLab--UNI2-h
       output: results/he/A16
-    load: "nice 19、2 线程、批量 32、批间 0.05 秒、负载 > 8 暂停 15 秒（同 A12）；分块检查点可续跑；预计提取约 3–4 小时，推理数分钟。"
-    preflight_addendum_2026-10-28: "run01 预检：旧尺度重建 cosine 全部 1.000；59/62 张改正后邻距 99.6–100.1 µm；GSM8714178/79/80（GSE274557 补充原发灶，Pt-6 / Pt-8）为 96.0–96.2 µm，按规则停止并报告。用户选择（2026-10-28，选项 1）：全部 62 张统一按 65 µm 口径提取，这 3 张照实记录为元数据邻距例外，不改标尺、不删样本（同 SR 支线 GEO_SCALE_CONVENTION 处理）；另报告去掉这 3 张后的主要比较作敏感性分析。主要终点与判定标准不变；新运行目录 run02，run01 保留为预检记录。"
+    load: "nice 19, 2 threads, batch 32, 0.05 s between batches, 15 s pause while load > 8 (as A12); chunked checkpoints for resuming; about 3–4 hours of extraction and minutes of inference."
+    preflight_addendum_2026-10-28: "run01 preflight: old-scale reconstruction cosine 1.000 throughout; 59/62 sections had corrected pitch 99.6–100.1 µm; GSM8714178/79/80 (additional GSE274557 primaries, Pt-6 / Pt-8) had 96.0–96.2 µm, so the run stopped and was reported by rule. Decision (2026-10-28, option 1): all 62 sections extracted under the 65 µm convention, the 3 sections recorded as metadata pitch exceptions without changing the scale or dropping samples; the primary comparison without these 3 sections is reported as a sensitivity analysis. Primary endpoint and criterion unchanged; new run directory run02, run01 kept as the preflight record."
     spacing_exceptions: [GSM8714178, GSM8714179, GSM8714180]
 
-  A17_cptac_and_d1_neighbourhood:   # 2026-10-28 用户要求（"先查 CPTAC 为什么不重复…然后在自有 Visium HD 上看空间邻域，用 HDD1 即可"）；探索性，事后追加，不改任何既有结论
+  A17_cptac_and_d1_neighbourhood:   # 2026-10-28 request (first examine why CPTAC does not replicate, then the spatial neighbourhood in one PDAC Visium HD section, HDD1); exploratory, post hoc, changes no existing conclusion
     status: exploratory_2026-10-28
     part1_cptac_description:
-      question: "A9 空间模型预测状态的预后在 TCGA 显著、CPTAC 不重复，原因是什么？用户猜测 CPTAC 随访太短。"
-      descriptive_only: "两队列随访（反向 KM 中位随访、最长随访、死亡比例、删失时间）；A9 预测与实测 RNA 目标的一致性（引自 A9 ci_paired）。不新增生存检验。"
+      question: "the prognostic association of the A9 spatial-model state is significant in TCGA but does not replicate in CPTAC; why? One hypothesis is that CPTAC follow-up is too short."
+      descriptive_only: "follow-up in both cohorts (reverse-KM median follow-up, maximum follow-up, proportion of deaths, censoring times); agreement of A9 predictions with measured RNA targets (from A9 ci_paired). No new survival tests."
     part2_d1_neighbourhood:
-      question: "D1（自有 Visium HD，FFPE 原发）中，CAF 状态高的区域周围是什么：免疫细胞多少、邻近肿瘤细胞偏 basal 还是 classical、MAPK 活性？与 Figure 4d 的 bulk 关联对照。"
-      cells: "Space Ranger 分割细胞，只用与核匹配的细胞（同 he_10 region_labels）；区域 = 150 µm 网格，键、相对状态 rel 与 CAF-rich 掩膜与 A10 labels_D1_150 完全相同（逐项断言）"
-      cell_types: "用户已有注释 /Users/Zhaiyue/VISIUMHDdata/HDD1_count/outs/results/cell_type.loupe_category.csv（GraphCluster 命名，15 类，含 Basal-like / Classical / Proliferating Malignant、iCAF、myCAF、TAMs (SPP1+)、Acinar、ADM、Normal Ductal 等；Low_quality 不计入比例分母）。读取前未看任何结局；不重新注释"
-      context: "每个区域的邻域窗口 = 本区域 + 周围 8 个区域（3×3，450 µm）：各注释细胞类型比例；恶性细胞中 Basal-like 的比例（Basal-like /(Basal-like + Classical)，恶性细胞 < 20 个记缺失）；窗口内恶性细胞拟 bulk 的 MPAS 与 Moffitt basal − classical（基因集取 config/published_signatures.yaml，各基因 log1p CP10k 在窗口间 z 化后取均值）。myCAF 比例作阳性对照（预期与状态正相关）"
-      statistics: "CAF-rich 区域内 Spearman(rel, 各邻域指标)，并同时给 Spearman(CAF 数量 = 区域 pan-CAF log1p CP10k, 各指标) 作对照（对应 Fig 4b 的状态 vs 数量）；空间块 bootstrap（4×4 区域 = 600 µm 块，2000 次，seed 20261028）给 95% CI。单张切片、探索性，不设通过标准，不推广到患者层面。"
-    outputs: "results/he/A17/<运行日期>/"
-    load: "nice 19、2 线程；只读 VISIUMHDdata"
+      question: "in D1 (PDAC Visium HD, FFPE primary), what surrounds regions with high CAF state: how many immune cells, are nearby tumour cells basal or classical, and what is the MAPK activity? Compared with the bulk associations (Fig 4d at the time)."
+      cells: "Space Ranger segmented cells, only those matched to nuclei (as he_10 region_labels); region = 150 µm grid; keys, relative state rel and CAF-rich mask identical to A10 labels_D1_150 (asserted item by item)"
+      cell_types: "existing annotation HDD1_count/outs/results/cell_type.loupe_category.csv (GraphCluster names, 15 classes including Basal-like / Classical / Proliferating Malignant, iCAF, myCAF, TAMs (SPP1+), Acinar, ADM, Normal Ductal; Low_quality excluded from proportion denominators). No outcome inspected before reading; no re-annotation"
+      context: "neighbourhood window per region = the region + its 8 neighbours (3×3, 450 µm): proportion of each annotated cell type; basal-like share of malignant cells (Basal-like /(Basal-like + Classical); missing if < 20 malignant cells); MPAS and Moffitt basal − classical of the malignant-cell pseudo-bulk in the window (gene sets from config/published_signatures.yaml, per-gene log1p CP10k z-scored across windows, then averaged). myCAF proportion as a positive control (expected to correlate positively with state)"
+      statistics: "within CAF-rich regions, Spearman(rel, each neighbourhood metric), with Spearman(CAF amount = region pan-CAF log1p CP10k, each metric) as a comparator (state vs amount); spatial block bootstrap (4×4 regions = 600 µm blocks, 2000, seed 20261028) for 95% CI. Single section, exploratory, no pass criterion, not generalised to patient level."
+    outputs: "results/he/A17/<run date>/"
+    load: "nice 19, 2 threads; Visium HD data read only"

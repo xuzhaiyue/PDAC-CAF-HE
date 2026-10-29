@@ -1,9 +1,9 @@
-"""修订 A17（探索性，2026-10-28 用户要求）第 2 部分：D1 中 CAF 状态高的区域周围是什么。
+"""Amendment A17 (exploratory) part 2: what surrounds high-CAF-state regions in D1.
 
-区域、相对状态 rel、CAF-rich 掩膜按 he_10.region_labels 重建，并与 A10 labels_D1_150 逐项断言一致；
-细胞类型用用户已有注释（VISIUMHDdata/HDD1_count/outs/results/cell_type.loupe_category.csv），不重新注释。
-邻域窗口 = 3×3 个 150 µm 区域；CAF-rich 区域内 Spearman(rel, 指标) 与 Spearman(CAF 数量, 指标)，空间块 bootstrap 95% CI。
-在 he/ 目录内运行：nice -n 19 ~/miniforge3/envs/hemorph/bin/python he_30_a17_d1_neighbourhood.py
+Regions, relative state rel and the CAF-rich mask are rebuilt with he_10.region_labels and asserted identical to A10 labels_D1_150;
+cell types come from the existing annotation (HDD1_count/outs/results/cell_type.loupe_category.csv); no re-annotation.
+Neighbourhood window = 3×3 regions of 150 µm; within CAF-rich regions, Spearman(rel, metric) and Spearman(CAF amount, metric), spatial block bootstrap 95% CI.
+Run inside he/: nice -n 19 ~/miniforge3/envs/hemorph/bin/python he_30_a17_d1_neighbourhood.py
 """
 from __future__ import annotations
 
@@ -35,14 +35,14 @@ MALIGNANT = ["Basal-like Malignant", "Classical Malignant", "Proliferating Malig
 def main():
     if os.getpriority(os.PRIO_PROCESS, 0) < 19:
         os.nice(19 - os.getpriority(os.PRIO_PROCESS, 0))
-    assert not (OUT / "correlations.tsv").exists(), "不覆盖已有结果"
+    assert not (OUT / "correlations.tsv").exists(), "do not overwrite existing results"
     OUT.mkdir(parents=True, exist_ok=True)
     cfg = C.load_config(); smp = next(x for x in C.samples(cfg) if x.sample_id == "D1")
     a = IO.read_cell_counts(smp); nuc = IO.read_polygons(smp, "nucleus")
     a = a[a.obs_names.isin(nuc.index)]
     X = sp.csr_matrix(a.X); var = list(a.var_names); vix = {g: i for i, g in enumerate(var)}
 
-    # ---- 重建 A10 区域标签（与 he_10.region_labels 相同）
+    # ---- Rebuild A10 region labels (as he_10.region_labels)
     PROG = yaml.safe_load((PROJ / "results/fig1/signature/programs.yaml").read_text())
     PUB = yaml.safe_load((PROJ / "config/published_signatures.yaml").read_text())
     progs = C.load_programs(cfg, a.var_names)
@@ -60,16 +60,16 @@ def main():
     caf = (ncell >= 5) & (aci <= 0.2) & (u["pan"].to_numpy() >= 10 * (SIZE / 100) ** 2)
     reg = pd.DataFrame({"key": keys, "rel": (s_.prog - s_.pan).to_numpy(), "amount": s_.pan.to_numpy(), "caf_rich": caf}).set_index("key")
     ref = pd.read_csv(A10_LAB, sep="\t").set_index("key")
-    assert reg.index.equals(ref.index) and np.allclose(reg.rel, ref.rel) and (reg.caf_rich == ref.caf_rich).all(), "与 A10 标签不一致"
+    assert reg.index.equals(ref.index) and np.allclose(reg.rel, ref.rel) and (reg.caf_rich == ref.caf_rich).all(), "inconsistent with A10 labels"
 
-    # ---- 用户注释
+    # ---- Cell annotation
     ann = pd.read_csv(ANN).set_index("Barcode").Category
     ct = pd.Series(a.obs_names, index=a.obs_names).map(ann)
     cover = float(ct.notna().mean()); assert cover > .95, cover
     ct = ct.fillna("unannotated").to_numpy()
     types = sorted(set(ct) - {"Low_quality", "unannotated"})
 
-    # ---- 3×3 窗口
+    # ---- 3×3 windows
     reg["ix"] = reg.index // 1_000_000; reg["iy"] = reg.index % 1_000_000
     cells = pd.DataFrame({"ix": ix, "iy": iy, "ct": ct})
     counts = cells.groupby(["ix", "iy", "ct"]).size().unstack(fill_value=0)
@@ -107,7 +107,7 @@ def main():
     ctx["malignant_basal_minus_classical"] = ctx.malignant_basal - ctx.malignant_classical
     d = reg.join(ctx); d.to_csv(OUT / "regions.tsv", sep="\t")
 
-    # ---- 相关与空间块 bootstrap
+    # ---- Correlations and spatial block bootstrap
     q = d[d.caf_rich].copy(); q["block"] = (q.ix // BLOCK).astype(str) + "_" + (q.iy // BLOCK).astype(str)
     metrics = [f"frac_{t}" for t in types] + ["basal_fraction_of_malignant", "malignant_MPAS", "malignant_basal_minus_classical"]
     rng = np.random.default_rng(SEED); blocks = q.block.unique(); members = {b: np.where(q.block.to_numpy() == b)[0] for b in blocks}

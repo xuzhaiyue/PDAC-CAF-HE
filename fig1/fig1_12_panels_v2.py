@@ -1,14 +1,14 @@
-"""Fig 1 面板 v2（审稿人友好版，pdac_scvi 环境）。旧版 fig1_06_panels.py 保留，其 d/e/f 面板转为补充图。
+"""Fig 1 panels v2 (pdac_scvi environment). The earlier fig1_06_panels.py is kept; its d/e/f panels became supplementary.
 
-b  global_umap        全局图谱：全部谱系上色（按细胞区室分色系，区室内深浅区分），每个谱系直接标注
-c  lineage_dotplot    大类标志基因 dotplot（注释依据）
-d  caf_umap           CAF 细分：8 个亚群上色（myCAF 橙系 / iCAF 绿系 / 其他灰系），CTHRC1+ 为蓝色
-e  subtype_dotplot    亚群标志基因 + 经典 CAF 标志（ACTA2、LRRC15、FAP、PDGFRA、CXCL12、IL6、HLA-DRA、CD74）
-f  composition        按组织类型（正常/癌旁、未治疗、化疗后、治疗未知）的各样本 CAF 亚群组成
-g  program_dotplot    程序基因与泛 CAF 参考在全部谱系和 CAF 亚群中的表达（替代旧 d/e/f）
-h  lodo               留一数据集验证（沿用旧版）
+b  global_umap        global atlas: all lineages coloured (hue family per compartment, shades within), each lineage labelled
+c  lineage_dotplot    lineage marker dot plot (basis of annotation)
+d  caf_umap           CAF subtypes: 8 clusters coloured (myCAF orange / iCAF green / others grey), CTHRC1+ in blue
+e  subtype_dotplot    cluster markers + classical CAF markers (ACTA2, LRRC15, FAP, PDGFRA, CXCL12, IL6, HLA-DRA, CD74)
+f  composition        CAF cluster composition per sample by tissue type (normal/adjacent, untreated, post-chemotherapy, treatment unknown)
+g  program_dotplot    programme genes and pan-CAF reference across all lineages and CAF clusters (replaces the earlier d/e/f)
+h  lodo               leave-one-dataset-out validation (as before)
 
-dotplot：点大小 = 表达细胞比例，颜色 = 平均 log 表达，每个基因在行间缩放到 0–1（g 中谱系与 CAF 亚群两块一起缩放）。
+Dot plots: dot size = fraction of expressing cells, colour = mean log expression, each gene scaled to 0–1 across rows (in g, lineages and CAF clusters scaled together).
 """
 from __future__ import annotations
 
@@ -210,7 +210,7 @@ TISSUE_ORDER = ["Normal/adj.", "PDAC naive", "Post-chemo", "Tx unknown"]
 
 
 def panel_composition(a, min_cafs=30, present_at=0.05):
-    """样本 = 患者 × 条件（同一患者的肿瘤与癌旁分开计）；只画 ≥min_cafs 个 CAF 的样本。"""
+    """Sample = patient × condition (tumour and adjacent tissue of one patient counted separately); only samples with >= min_cafs CAFs are plotted."""
     obs = a.obs[["dataset", "patient_key", "condition", "subtype"]].astype(str)
     obs["tissue"] = obs.condition.map(TISSUE)
     obs["sample"] = obs.patient_key + "|" + obs.condition

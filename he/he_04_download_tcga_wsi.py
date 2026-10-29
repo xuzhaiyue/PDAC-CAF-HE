@@ -1,9 +1,9 @@
-"""下载 TCGA-PAAD 诊断全切片（用户 2026-10-20 同意：209 张，约 245 GB，存到 INTENSO）。hemorph 环境。
+"""Download TCGA-PAAD diagnostic whole-slide images (209 slides, ~245 GB). hemorph environment.
 
-清单：GALNT 项目的 gdc_paad_dx_slides.csv（只读）；md5 从 GDC API 批量获取。
-方式：GDC data API + curl 断点续传（.part 临时文件），8 个并行（最初 3 个，速度约 3 MB/s 后提高），下载完逐个核对大小与 md5，通过后改名为正式文件名。
-队列内病人（Figure 2 的 147 例导管腺癌）优先下载。已存在且 md5 正确的文件跳过。
-日志：results/he/wsi_download/status.tsv（每个文件一行，可反复运行续传）
+Manifest: gdc_paad_dx_slides.csv (read only); md5 fetched in batch from the GDC API.
+Method: GDC data API + resumable curl (.part temporary files), 8 in parallel; size and md5 checked after each download before renaming to the final file name.
+Cohort patients (the 147 ductal adenocarcinomas) are downloaded first. Existing files with correct md5 are skipped.
+Log: results/he/wsi_download/status.tsv (one row per file; re-run to resume)
 """
 from __future__ import annotations
 

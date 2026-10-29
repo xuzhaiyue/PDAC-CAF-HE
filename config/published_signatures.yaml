@@ -1,22 +1,22 @@
-# 已发表的 PDAC 基质 / CAF 基因集，用于和 CTHRC1+ 程序比较（Figure 1 补充图）。
-# 只收录能追溯到原文或作者官方代码的列表；不凭记忆填写。2026-10-19 核对。
-# 不收录 StRoMA（Translational Oncology 2026）：单篇文章，不作为生物学参照；它只在 H&E 模型比较（Figure 4）中出现。
+# Published PDAC stromal / CAF gene sets compared with the CTHRC1+ programme (Figure 1 supplement).
+# Only lists traceable to the original paper or the authors' official code; nothing filled in from memory. Checked 2026-10-19.
+# StRoMA (Translational Oncology 2026) is not included: a single study, not used as a biological reference; it appears only in the H&E model comparison.
 
 Moffitt_activated_stroma:
   label: Moffitt activated stroma
-  source: Moffitt et al., Nat Genet 2015 (PMID 26343385)；25 基因，取自作者 pdacR 包 data/gene_lists.rds 的 Moffitt.Activated.25
+  source: Moffitt et al., Nat Genet 2015 (PMID 26343385); 25 genes, Moffitt.Activated.25 from data/gene_lists.rds in the authors' pdacR package
   genes: [CDH11, COL10A1, COL11A1, COL1A1, COL1A2, COL3A1, COL5A1, COL5A2, COMP, CTHRC1, FAP, FN1, FNDC1, GREM1,
           INHBA, ITGA11, LUM, MMP11, POSTN, SFRP2, SPARC, SULF1, THBS2, VCAN, ZNF469]
 
 Moffitt_normal_stroma:
   label: Moffitt normal stroma
-  source: Moffitt et al., Nat Genet 2015；pdacR 的 Moffitt.Normal.25（C10orf116、C2orf40、LPHN3 为旧基因名，按交集自动缺失）
+  source: Moffitt et al., Nat Genet 2015; pdacR Moffitt.Normal.25 (C10orf116, C2orf40 and LPHN3 are old symbols and drop out at intersection)
   genes: [ABCA8, ACTG2, ADAMTS1, ANGPTL7, C10orf116, C2orf40, CDH19, DES, FABP4, GPM6B, ID4, IGF1, LMOD1, LPHN3,
           MEOX2, MYH11, OGN, PLP1, PTX3, RBPMS2, RERGL, RSPO3, SCRG1, SYNM, VIT]
 
 Puleo_stroma_activated:
   label: Puleo stroma activated
-  source: Puleo et al., Gastroenterology 2018 (PMID 30165049) 分型质心表 mmc3；按 pdacR 规则（每个基因归入质心最高的亚型）取 "Stroma.Activated" 的 62 个基因
+  source: Puleo et al., Gastroenterology 2018 (PMID 30165049), subtype centroid table mmc3; following pdacR (each gene assigned to its highest-centroid subtype), the 62 "Stroma.Activated" genes
   genes: [TEAD3, COMP, S100A4, COL6A3, WNT5A, NKD2, MFGE8, TUBB3, SFTA2, TMEM45A, ITFG1, FKBP10, THBS2, PXDN, JUP,
           LBH, COL10A1, HCFC1R1, CERCAM, SPOCK1, NPR3, TIMP2, NUAK1, MICAL2, WNT10A, PDLIM7, LOXL1, ANO1, TMEM200A,
           RCN3, CNIH3, TSKU, EDNRA, ADAMTS2, CHPF, CD276, TIMP3, HSPB1, FN1, TGFB1I1, AEBP1, LRRN1, COL5A1, TMEM158,
@@ -25,38 +25,38 @@ Puleo_stroma_activated:
 
 Elyada_myCAF:
   label: Elyada myCAF
-  source: Elyada et al., Cancer Discov 2019 (PMC6727976)，Methods 中的 myCAF signature
+  source: Elyada et al., Cancer Discov 2019 (PMC6727976), myCAF signature from Methods
   genes: [TAGLN, ACTA2, MMP11, PDGFRB, HOPX, POSTN]
 
 Elyada_iCAF:
   label: Elyada iCAF
-  source: Elyada et al., Cancer Discov 2019，Methods 中的 iCAF signature
+  source: Elyada et al., Cancer Discov 2019, iCAF signature from Methods
   genes: [IL6, PDGFRA, CFD, PLA2G2A, HAS1, CXCL2, CCL2, CLU, EMP1, LMNA]
 
 Elyada_apCAF:
   label: Elyada apCAF
-  source: Elyada et al., Cancer Discov 2019，Results 中人 apCAF 的标志基因（HLA-DRA/DPA1/DQA1、CD74、SLPI）；原文没有给出正式的人 apCAF 基因集
+  source: Elyada et al., Cancer Discov 2019, human apCAF marker genes from Results (HLA-DRA/DPA1/DQA1, CD74, SLPI); the paper gives no formal human apCAF gene set
   genes: [HLA-DRA, HLA-DPA1, HLA-DQA1, CD74, SLPI]
 
 Dominguez_LRRC15_CAF:
   label: Dominguez LRRC15+ CAF
-  source: Dominguez et al., Cancer Discov 2020 (PMID 31699795)，用于 TCGA 泛癌分析的 11 基因 TGFβ / LRRC15+ CAF 核心集
+  source: Dominguez et al., Cancer Discov 2020 (PMID 31699795), 11-gene TGFβ / LRRC15+ CAF core set used in the TCGA pan-cancer analysis
   genes: [MMP11, COL11A1, C1QTNF3, CTHRC1, COL12A1, COL10A1, COL5A2, THBS2, AEBP1, LRRC15, ITGA11]
 
-# ---- 肿瘤细胞内在特征（Figure 2 关联分析用）
+# ---- Tumour-intrinsic signatures (association analyses)
 Moffitt_basal:
   label: Moffitt basal-like
-  source: Moffitt et al., Nat Genet 2015；pdacR 的 Moffitt.Basal.25
+  source: Moffitt et al., Nat Genet 2015; pdacR Moffitt.Basal.25
   genes: [ANXA8L2, AREG, CST6, CTSL2, DHRS9, FAM83A, FGFBP1, GPR87, KRT15, KRT17, KRT6A, KRT6C, KRT7, LEMD1, LY6D,
           S100A2, SCEL, SERPINB3, SERPINB4, SLC2A1, SPRR1B, SPRR3, TNS4, UCA1, VGLL1]
 
 Moffitt_classical:
   label: Moffitt classical
-  source: Moffitt et al., Nat Genet 2015；pdacR 的 Moffitt.Classical.25
+  source: Moffitt et al., Nat Genet 2015; pdacR Moffitt.Classical.25
   genes: [AGR2, AGR3, ANXA10, ATAD4, BTNL8, CDH17, CEACAM6, CLRN3, CTSE, CYP3A7, FAM3D, KRT20, LGALS4, LOC400573, LYZ,
           MYO1A, PLA2G10, REG4, SPINK4, ST6GALNAC1, TFF1, TFF2, TFF3, TSPAN8, VSIG2]
 
 MPAS:
   label: MAPK pathway activity score
-  source: Wagle et al., npj Precis Oncol 2018 (PMC5871852)；队列内各基因 z 分数求和 / sqrt(10)
+  source: Wagle et al., npj Precis Oncol 2018 (PMC5871852); sum of within-cohort gene z-scores / sqrt(10)
   genes: [PHLDA1, SPRY2, SPRY4, DUSP4, DUSP6, CCND1, EPHA2, EPHA4, ETV4, ETV5]

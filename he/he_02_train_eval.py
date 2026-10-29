@@ -1,13 +1,13 @@
-"""H&E 模型：TCGA 交叉验证 + CPTAC 外部验证（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 he_model（已冻结）。
+"""H&E models: TCGA cross-validation + CPTAC external validation (hemorph environment, MPS). Rules in the he_model section of config/fig1.yaml (fixed).
 
-I1 加和式解耦模型：图块 MLP → 5 个非负局部量（程序、Moffitt 活化、Dominguez、StRoMA 3 基因、泛 CAF），
-   切片层面 P_k = 图块均值，输出_k = a_k·log(P_k) + b_k（a_k > 0）；损失只拟合 bulk 的原始得分（log2 尺度）。
-   相对得分 = 输出_基因集 − 输出_泛CAF（结构上分开状态与数量）。
-B1 均值池化 + 岭回归：每个目标单独，alpha 由内层 5 折选择。
-B2 注意力 MIL（范文式）：切片层面直接回归全部 8 个目标（z 标准化）。
-TCGA：患者层面 5 折 × 5 次重复（三个模型用相同折）；CPTAC：全部 TCGA 训练（神经网络 5 个种子取均值）。
-输出：results/he/{oof_tcga.tsv, pred_cptac.tsv, metrics_tcga.tsv, metrics_cptac.tsv, decoupling_cptac.tsv}
-用法：python he_02_train_eval.py [--quick]   （--quick：1 次重复、少轮数，只用于检查代码能跑通）
+I1 additive decoupling model: tile MLP → 5 non-negative local quantities (programme, Moffitt activated, Dominguez, StRoMA 3-gene, pan-CAF),
+   slide-level P_k = tile mean, output_k = a_k·log(P_k) + b_k (a_k > 0); the loss fits only the raw bulk scores (log2 scale).
+   relative score = output_geneset − output_panCAF (state and amount separated by construction).
+B1 mean pooling + ridge regression: one model per target, alpha chosen by inner 5-fold CV.
+B2 attention MIL: slide-level regression of all 8 targets (z-scored).
+TCGA: patient-level 5-fold × 5 repeats (same folds for the three models); CPTAC: trained on all TCGA (neural networks averaged over 5 seeds).
+Outputs: results/he/{oof_tcga.tsv, pred_cptac.tsv, metrics_tcga.tsv, metrics_cptac.tsv, decoupling_cptac.tsv}
+Usage: python he_02_train_eval.py [--quick]   (--quick: 1 repeat, few epochs, only to check that the code runs)
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ SEED = CFG["random_seed"]
 DEV = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 torch.set_num_threads(8)
 
-HEADS = ["program", "Moffitt_activated", "Dominguez_LRRC15", "StRoMA_3gene", "pan_CAF"]   # I1 的非负局部量
+HEADS = ["program", "Moffitt_activated", "Dominguez_LRRC15", "StRoMA_3gene", "pan_CAF"]   # non-negative local quantities of I1
 REL = {"program_rel": "program", "Moffitt_activated_rel": "Moffitt_activated", "Dominguez_LRRC15_rel": "Dominguez_LRRC15"}
 TARGETS = ["program_rel", "pan_CAF", "program", "Moffitt_activated_rel", "Moffitt_activated",
            "Dominguez_LRRC15_rel", "Dominguez_LRRC15", "StRoMA_3gene"]

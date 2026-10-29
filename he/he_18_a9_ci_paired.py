@@ -1,8 +1,8 @@
-"""修订 A9：病人层面 AUC / Spearman 的 bootstrap 95% CI 与配对比较（hemorph 环境）。规则见 config/fig1.yaml 的 A9（已冻结）。
+"""Amendment A9: bootstrap 95% CIs and paired comparisons of patient-level AUC / Spearman (hemorph environment). Rules in A9 of config/fig1.yaml (fixed).
 
-参照模型：A9 all70（全部 70 个胰腺癌空间样本微调）；对照：A9 消融（own4_only、primary_only）、A8 finetuned_all8、
-A8 zero-shot、A2 I1、A2 B2、A1 岭回归。方法与 he_15 相同（同一组 2000 次病人重抽样；AUC 另做 DeLong 配对检验）。
-输出：results/he/A9/ci_paired.tsv
+Reference model: A9 all70 (fine-tuned on all 70 PDAC spatial sections); comparators: A9 ablations (own4_only, primary_only), A8 finetuned_all8,
+A8 zero-shot, A2 I1, A2 B2, A1 ridge. Method as in he_15 (one set of 2000 patient resamples; DeLong paired test for AUC).
+Output: results/he/A9/ci_paired.tsv
 """
 from __future__ import annotations
 

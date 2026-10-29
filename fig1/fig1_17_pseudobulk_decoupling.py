@@ -1,12 +1,12 @@
-"""模拟 bulk 拆分检验（hemorph 环境）。规则见 config/fig1.yaml 的 decoupling（运行前已冻结）。
+"""Simulated bulk decoupling test (hemorph environment). Rules in the decoupling section of config/fig1.yaml (fixed before running).
 
-A. 真实样本：每个 患者×条件 的全部细胞加总为模拟 bulk；真值 = CAF 占比（全数据谱系注释）
-   与 CTHRC1+ 占 CAF 的比例（CAF 图谱，随机抽样的清理后 CAF）
-B. 受控混合：每个数据集内，从肿瘤样本的 CTHRC1+ CAF / 其他 CAF / 非 CAF 细胞池按网格抽样（有放回），
-   CAF 占比与 CTHRC1+ 比例正交变化
-得分（bulk 常用写法）：基因集内 log2(CPM+1) 的均值；相对得分 = 该得分 − 泛 CAF 得分。
-比较对象：本程序、Moffitt 活化基质、Dominguez LRRC15+，各自的原始得分与相对得分；以及泛 CAF 本身。
-Output: results/fig1/decoupling/*.tsv，results/fig1/figure_panels/decoupling.{pdf,png}
+A. Real samples: all cells of each patient × condition summed into a pseudo-bulk; truth = CAF fraction (lineage annotation of all data)
+   and CTHRC1+ fraction of CAFs (CAF atlas, randomly subsampled cleaned CAFs)
+B. Controlled mixtures: within each dataset, grid sampling (with replacement) from tumour-sample pools of CTHRC1+ CAFs / other CAFs / non-CAF cells,
+   with CAF fraction and CTHRC1+ fraction varied orthogonally
+Scores (usual bulk definition): mean log2(CPM+1) of the gene set; relative score = that score − pan-CAF score.
+Compared: this programme, Moffitt activated stroma and Dominguez LRRC15+, raw and relative scores each; and the pan-CAF score itself.
+Output: results/fig1/decoupling/*.tsv, results/fig1/figure_panels/decoupling.{pdf,png}
 """
 from __future__ import annotations
 

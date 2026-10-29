@@ -235,7 +235,7 @@ def main():
             tests.append(dict(contrast=name,n_patients=len(p),median_delta=float(np.median(d)),lo=float(np.quantile(boot,.025)),hi=float(np.quantile(boot,.975)),p_wilcoxon=pv,n_improved=int((d>0).sum())))
         pd.DataFrame(tests).to_csv(out/'paired_tests.tsv',sep='\t',index=False);verdict=dict(primary_pass=bool(tests[0]['median_delta']>0 and tests[0]['p_wilcoxon']<.05),primary=tests[0],completed_at=now());save(out/'verdict.json',verdict)
         save(out/'protected_model_hashes.json',{v['path']:v['sha256'] for v in inputs.values() if '/models/' in v['path']});assert all(sha(k)==v for k,v in json.loads((out/'protected_model_hashes.json').read_text()).items())
-        (out/'RESULTS.md').write_text('# A15结果\n\n```text\n'+pd.DataFrame(tests).to_string(index=False)+'\n```\n\n主要标准通过：'+str(verdict['primary_pass'])+'。详见冻结配置、封存TCGA参考、输入清单、逐图块重放检查及regions原mask核对。\n')
+        (out/'RESULTS.md').write_text('# A15 results\n\n```text\n'+pd.DataFrame(tests).to_string(index=False)+'\n```\n\nPrimary criterion passed: '+str(verdict['primary_pass'])+'. See the fixed configuration, sealed TCGA reference, input manifest, per-tile replay checks and the original region-mask checks.\n')
         state(stage='complete',completed_slides=66);(out/'COMPLETE').write_text(now());log('A15 COMPLETE')
     except Exception as exc:
         state(stage='error',error=str(exc),traceback=traceback.format_exc());log(traceback.format_exc());raise

@@ -1,10 +1,10 @@
-"""CTHRC1+ 程序与已发表 PDAC 基质 / CAF 基因集的比较（Figure 1 补充图，pdac_scvi 环境）。
+"""Comparison of the CTHRC1+ programme with published PDAC stromal / CAF gene sets (Figure 1 supplement, pdac_scvi environment).
 
-A  overlap        程序基因与泛 CAF 参考在各已发表基因集中的成员关系
-B  subtype_scores 各已发表基因集在 8 个 CAF 亚群中的得分（亚群均值，按基因集在亚群间 z 标准化）
-C  contribution   各基因集成员基因在 PDAC 组织中来自成纤维细胞的比例（三个数据集均值）
-                  注：本程序按 ≥0.6 筛选，C 中它的高值是筛选规则的结果，不是独立证据。
-基因集：config/published_signatures.yaml（均可追溯到原文或作者代码）。
+A  overlap        membership of programme genes and the pan-CAF reference in each published gene set
+B  subtype_scores score of each published gene set in the 8 CAF clusters (cluster means, z-scored across clusters per gene set)
+C  contribution   fraction of each gene set's member transcripts in PDAC tissue coming from fibroblasts (mean of three datasets)
+                  note: the programme was selected at >= 0.6, so its high value in C follows from the selection rule and is not independent evidence.
+Gene sets: config/published_signatures.yaml (all traceable to the original paper or the authors' code).
 Output: results/fig1/figure_panels/supp_published_signatures.{pdf,png}, results/fig1/published_signatures/*.tsv
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ from fig1_06_panels import BLUE, GRAY_LIGHT, GRAY_MID, INK, INK2, OUT, PROG, ROO
 from fig1_12_panels_v2 import SUB_COLOR, SUB_ORDER, SUB_SHORT, load_caf  # noqa: E402
 
 PUB = yaml.safe_load((Path(__file__).resolve().parents[1] / "config" / "published_signatures.yaml").read_text())
-PUB = {k: v for k, v in PUB.items() if k not in ("Moffitt_basal", "Moffitt_classical", "MPAS")}   # 只比较基质 / CAF 基因集
+PUB = {k: v for k, v in PUB.items() if k not in ("Moffitt_basal", "Moffitt_classical", "MPAS")}   # stromal / CAF gene sets only
 TAB = ROOT / "published_signatures"
 TAB.mkdir(parents=True, exist_ok=True)
 DIV = LinearSegmentedColormap.from_list("div", ["#2a78d6", "#9ec5f4", "#f0efec", "#f4a3a2", "#e34948"])

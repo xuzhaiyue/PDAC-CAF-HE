@@ -1,9 +1,9 @@
-"""冻结修订 A16：62 张 GEO 公开切片按 65 µm 口径（µm/px = 65 / spot_diameter_fullres / ratio）重新提取真实 112 / 128 µm 视野的
-UNI2-h 特征，S0 / S1 只读推理，与 A12 旧尺度（实际约 132 / 151 µm）配对比较。规则见 config/fig1.yaml 的 A16_geo_true_scale。
+"""Fixed amendment A16: re-extract UNI2-h features of true 112 / 128 µm fields for 62 public GEO sections using the 65 µm convention (µm/px = 65 / spot_diameter_fullres / ratio),
+read-only S0 / S1 inference, paired with the old A12 scale (actually ~132 / 151 µm). Rules in A16_geo_true_scale of config/fig1.yaml.
 
-流程与 A12（he_22）相同，只改 GEO 的 µm/px：读图、中心、条码、裁切、resize、编码、区域汇总全部复用。
-HEST 4 张与自有 HD 4 张沿用 A12 / A10 原值。不训练、不下载；nice 19、2 线程、批量 32、负载 > 8 暂停。
-分阶段：preflight（邻距 + 旧尺度重建）→ extract（可续跑）→ evaluate。在 he/ 内运行。
+Same pipeline as A12 (he_22) with only the GEO µm/px changed: image reading, centres, barcodes, cropping, resizing, encoding and region aggregation are reused.
+The 4 HEST and 4 PDAC Visium HD sections keep their A12 / A10 values. No training, no downloads; nice 19, 2 threads, batches of 32, pause while load > 8.
+Stages: preflight (spot pitch + old-scale reconstruction) → extract (resumable) → evaluate. Run inside he/.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from scipy.spatial import cKDTree  # noqa: E402
 
 from he_22_a10_scale_robustness import atomic_json, digest, pair_test  # noqa: E402
 
-# 用户 2026-10-28 再次要求降低电脑压力：负载阈值与批间暂停可调得更保守（只影响调度，不影响特征数值）
+# Load thresholds and inter-batch pauses can be made more conservative (scheduling only; feature values are unaffected)
 LOAD_GATE = float(os.environ.get("A16_LOAD_GATE", 8)); PAUSE = float(os.environ.get("A16_PAUSE", .05))
 SECTION_PAUSE = float(os.environ.get("A16_SECTION_PAUSE", 0))
 
@@ -84,7 +84,7 @@ def main():
                  + list((a10 / "models").glob("bulk_seed?.pt")) + [a10 / "models/bulk_feature_stats.pt"]}
 
     def image_data(sid, source):
-        """与 A12 相同的读图与中心；返回新旧两种 µm/px。"""
+        """Same image reading and centres as A12; returns both the new and the old µm/px."""
         gate()
         cache = a9 / "geo" / f"{sid}.npz"
         with np.load(cache, allow_pickle=True) as z:
@@ -114,17 +114,17 @@ def main():
         from he_05_extract_tcga_uni2h import load_model
         encoder, prep = load_model(str(dev)); torch.set_num_threads(2)
         if not marker.exists():
-            # 1) 邻距：全部 62 张按新 µm/px，组织内斑点最近邻中位距须为 100 ± 2 µm
+            # 1) Pitch: all 62 sections at the new µm/px; median nearest-neighbour distance of in-tissue spots must be 100 ± 2 µm
             spacing = []
             for _, r in geo.iterrows():
                 with np.load(a9 / "geo" / f"{r['sample']}.npz", allow_pickle=True) as z:
                     xy = z["coords"].astype(float) * float(z["pixel_size"]) * SPOT_UM / OLD_SPOT_UM
                 dmed = float(np.median(cKDTree(xy).query(xy, 2)[0][:, 1]))
-                exc = r["sample"] in rule.get("spacing_exceptions", [])   # 用户确认的元数据邻距例外：照实记录，不改标尺
+                exc = r["sample"] in rule.get("spacing_exceptions", [])   # confirmed metadata pitch exceptions: recorded as is, scale unchanged
                 spacing.append(dict(sample=r["sample"], source=r.source, nn_um_true=dmed, nn_um_old=dmed * OLD_SPOT_UM / SPOT_UM,
                                     within_100pm2=abs(dmed - 100) <= 2, documented_exception=exc, passed=abs(dmed - 100) <= 2 or exc))
             pd.DataFrame(spacing).to_csv(out / "preflight/spot_spacing.tsv", sep="\t", index=False)
-            # 2) 旧尺度重建：每来源首张切片 8 个斑点，旧 µm/px 的 112 µm 图块与原缓存 cosine
+            # 2) Old-scale reconstruction: 8 spots of the first section per source, cosine between 112 µm tiles at the old µm/px and the original cache
             checks = []
             for source, sid in geo.groupby("source", sort=True).first()["sample"].items():
                 img, centers, mpp, mpp_old, cache = image_data(sid, source)
@@ -188,7 +188,7 @@ def main():
         sid = r["sample"]
         base = dict(sample=sid, patient=r.patient, source=r.source, tissue=r.tissue, treated=r.treated, n_regions=r.n_regions,
                     S0_old128=r.S0_128, S1_old112=r.S1_112, S1_old128=r.S1_128, S2_historical=r.S2_historical)
-        if sid not in set(geo["sample"]):   # HEST / 自有 HD：尺度本来正确，沿用原值
+        if sid not in set(geo["sample"]):   # HEST / PDAC Visium HD: scale already correct, original values kept
             base.update(S0_true112=r.S0_112, S0_true128=r.S0_128, S1_true112=r.S1_112, S1_true128=r.S1_128, rescaled=False)
             rows.append(base); continue
         P.FEAT = a9 / "geo"; s = P.load_sample(sid)

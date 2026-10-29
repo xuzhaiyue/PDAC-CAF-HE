@@ -1,14 +1,14 @@
-"""外部单细胞验证（pdac_scvi 环境）。规则见 config/fig1.yaml 的 external_validation（运行前已冻结）。
+"""External single-cell validation (pdac_scvi environment). Rules in the external_validation section of config/fig1.yaml (fixed before running).
 
-每个外部数据集独立完成：
-  1. 读入计数（每样本抽样 ≤cap）→ 数据集内 MAD 质控
-  2. 全局 scVI（batch=患者）+ Leiden 0.5 → 按 lineage_markers 自动注释（最高谱系且领先 ≥margin）
-  3. 取成纤维细胞亚群 → 再次 scVI + Leiden 0.5 → 用与发现集相同的亚群排除规则清理一轮
-  4. 外部 CAF 亚群与发现集 8 个亚群做质心相关匹配（剔除程序基因和泛 CAF 基因，避免循环）
-  5. 指标：匹配到 CTHRC1+ 的亚群是否存在；程序 AUROC（并与 CTHRC1 单基因、Moffitt 活化基质、
-     Dominguez LRRC15+ 比较）；各样本 CTHRC1+ 占比；程序基因的患者配对 log2FC
-用法：python fig1_15_external_validation.py run GSE253429   |   python fig1_15_external_validation.py summary
-Output: results/fig1_external/<dataset>/，results/fig1_external/summary.tsv
+Each external dataset is processed independently:
+  1. Read counts (subsampled to <= cap per sample) → within-dataset MAD QC
+  2. Global scVI (batch = patient) + Leiden 0.5 → automatic annotation with lineage_markers (top lineage with lead >= margin)
+  3. Fibroblast clusters → second scVI + Leiden 0.5 → one round of cleaning with the same cluster-exclusion rules as discovery
+  4. External CAF clusters matched to the 8 discovery clusters by centroid correlation (programme and pan-CAF genes excluded to avoid circularity)
+  5. Metrics: presence of a cluster matched to CTHRC1+; programme AUROC (compared with CTHRC1 alone, Moffitt activated stroma and
+     Dominguez LRRC15+); CTHRC1+ fraction per sample; patient-paired log2FC of programme genes
+Usage: python fig1_15_external_validation.py run GSE253429   |   python fig1_15_external_validation.py summary
+Output: results/fig1_external/<dataset>/, results/fig1_external/summary.tsv
 """
 from __future__ import annotations
 

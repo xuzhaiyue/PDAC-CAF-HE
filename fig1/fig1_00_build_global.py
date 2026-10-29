@@ -1,10 +1,10 @@
-"""Fig 1 step 00 — 全局图谱输入（hemorph 环境）。
+"""Fig 1 step 00 — global atlas inputs (hemorph environment).
 
-三个单细胞数据集的所有细胞（GSE278688 排除 PBMC），每患者×条件最多 global_max_cells_per_patient 个，
-原始计数，基因取交集。作者标注保留在 author_label，只作对照；正式大类注释由全局聚类决定。
+All cells of the three single-cell datasets (PBMC excluded from GSE278688), at most global_max_cells_per_patient per patient × condition,
+raw counts, intersecting genes. Author labels are kept in author_label for comparison only; lineage annotation comes from global clustering.
 
-Output: results/fig1/global_raw.h5ad（抽样，用于整合与注释）
-        results/fig1/global_full_raw.h5ad（--cap 0：全部细胞，用于标签传递）
+Output: results/fig1/global_raw.h5ad (subsampled, for integration and annotation)
+        results/fig1/global_full_raw.h5ad (--cap 0: all cells, for label transfer)
 """
 from __future__ import annotations
 

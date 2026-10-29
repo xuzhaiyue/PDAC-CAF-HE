@@ -1,4 +1,4 @@
-# 只管代码、配置和文档（用户 2026-10-28 同意 git init）；数据与结果不进版本库
+# Code, configuration and documentation only; data and results are not version-controlled
 results/
 data/
 99_tmp/
@@ -7,7 +7,7 @@ __pycache__/
 *.pyc
 .DS_Store
 .ipynb_checkpoints/
-# 文档中的图片、网页与大文件（工作日志的截图 / 预览）
+# Images, web pages and large files inside docs
 docs/**/*.png
 docs/**/*.jpg
 docs/**/*.jpeg

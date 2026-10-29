@@ -1,5 +1,5 @@
-"""修订 A17 第 1 部分（描述性）：TCGA / CPTAC 随访、效能与两队列 HR 差异，写成表供补充表转录。
-病人匹配与过滤同 he_19_a9_prognosis.R。在 he/ 目录内运行：nice -n 19 ~/miniforge3/envs/hemorph/bin/python he_31_a17_cptac_summary.py
+"""Amendment A17 part 1 (descriptive): TCGA / CPTAC follow-up, power and between-cohort HR difference, tabulated for the supplementary tables.
+Patient matching and filtering as in he_19_a9_prognosis.R. Run inside he/: nice -n 19 ~/miniforge3/envs/hemorph/bin/python he_31_a17_cptac_summary.py
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ Phi = lambda z: 0.5 * (1 + erf(z / sqrt(2)))  # noqa: E731
 
 
 def power(hr, deaths):
-    z = log(hr) * sqrt(deaths)                # 每 SD 连续预测量：SE(logHR) ≈ 1/√D
+    z = log(hr) * sqrt(deaths)                # continuous per-SD predictor: SE(logHR) ≈ 1/√D
     return Phi(z - 1.96) + Phi(-z - 1.96)
 
 
@@ -30,7 +30,7 @@ def main():
         pr = pd.read_csv(A9 / f"patient_preds_{co}_all70.tsv", sep="\t").set_index("patient")
         d = cl.join(pr.pred_state, how="inner"); d = d[d.OS_time.notna() & (d.OS_time > 0) & d.OS.notna()]
         m = (d.OS_time / 30.4375).to_numpy(); e = d.OS.astype(int).to_numpy()
-        s, med = 1.0, np.nan                  # 反向 KM：删失作为事件
+        s, med = 1.0, np.nan                  # reverse KM: censoring as the event
         for t in np.sort(np.unique(m[e == 0])):
             s *= 1 - ((m == t) & (e == 0)).sum() / (m >= t).sum()
             if np.isnan(med) and s <= .5:

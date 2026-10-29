@@ -1,8 +1,8 @@
-"""修订 A4：按范文 StRoMA 的模型设计复现 TCGA 内部结果（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 A4（已冻结）。
+"""Amendment A4: replication of the StRoMA model design on TCGA (hemorph environment, MPS). Rules in A4 of config/fig1.yaml (fixed).
 
-两个版本：honest（训练折内留 10% 病例做早停）与 leaky_as_reported（用测试折早停，只作诊断）。
-用法：python he_08_stroma_model.py [--quick]
-输出：results/he/A4/{perfold.tsv, oof.tsv, summary.tsv}
+Two versions: honest (10% of training cases held out for early stopping) and leaky_as_reported (early stopping on the test fold, diagnostic only).
+Usage: python he_08_stroma_model.py [--quick]
+Outputs: results/he/A4/{perfold.tsv, oof.tsv, summary.tsv}
 """
 from __future__ import annotations
 

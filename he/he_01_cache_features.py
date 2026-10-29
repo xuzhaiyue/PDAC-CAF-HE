@@ -1,9 +1,9 @@
-"""H&E 特征缓存（hemorph 环境）。规则见 config/fig1.yaml 的 he_model（已冻结）。
+"""H&E feature cache (hemorph environment). Rules in the he_model section of config/fig1.yaml (fixed).
 
-从外接盘只读 UNI2-h 预提取特征，每张切片随机抽样 ≤ tiles_per_slide 个图块（种子固定），
-按患者合并（一名患者可有多张切片），存为 float16：results/he/cache/{cohort}/{patient}.npy（图块 × 1536）
-另存 coords（图块坐标，供画图）与 index.tsv（患者、切片、图块数）。
-同时计算 bulk 目标：在 fig2 得分表基础上加 StRoMA 3 基因评分（COL12A1、LOX、LOXL2 的 log 表达均值）。
+Reads pre-extracted UNI2-h features (read only) and randomly samples <= tiles_per_slide tiles per slide (fixed seed),
+merged per patient (a patient may have several slides), stored as float16: results/he/cache/{cohort}/{patient}.npy (tiles × 1536)
+Also stores coords (tile coordinates, for plotting) and index.tsv (patient, slide, tile count).
+Bulk targets: the bulk score table plus the StRoMA 3-gene score (mean log expression of COL12A1, LOX, LOXL2).
 """
 from __future__ import annotations
 

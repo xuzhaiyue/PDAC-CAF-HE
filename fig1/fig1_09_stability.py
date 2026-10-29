@@ -1,8 +1,8 @@
-"""Fig 1 step 09 — 最终 CAF 图谱的稳定性检查（pdac_scvi 环境）。
+"""Fig 1 step 09 — stability of the final CAF atlas (pdac_scvi environment).
 
-1. 聚类随机种子：leiden_0.5 换 5 个种子，整体 ARI + CTHRC1+ 亚群的 Jaccard（与每次结果中重合最多的亚群比较）
-2. 聚类分辨率：0.3 / 0.5 / 0.8 / 1.2 下，CTHRC1+ 亚群的最佳匹配 Jaccard，以及它被拆到几个亚群里
-3. 整合模型：scVI 用 2 个不同种子重新训练 → 重新建图聚类 → CTHRC1+ 亚群 Jaccard
+1. Clustering seed: leiden_0.5 with 5 seeds, overall ARI + Jaccard of the CTHRC1+ cluster (against the best-overlapping cluster each time)
+2. Clustering resolution: at 0.3 / 0.5 / 0.8 / 1.2, best-match Jaccard of the CTHRC1+ cluster and the number of clusters it splits into
+3. Integration model: scVI retrained with 2 other seeds → graph and clustering rebuilt → CTHRC1+ cluster Jaccard
 
 Output: results/fig1/integrate_caf_final/stability.tsv
 """

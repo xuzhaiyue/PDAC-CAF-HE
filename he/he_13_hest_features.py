@@ -1,11 +1,11 @@
-"""修订 A8 第 1 步：HEST 图块的 UNI2-h 特征与斑点层面计数（hemorph 环境，MPS，低负载）。规则见 config/fig1.yaml 的 A8（已冻结）。
+"""Amendment A8 step 1: UNI2-h features of HEST tiles and spot-level counts (hemorph environment, MPS, low load). Rules in A8 of config/fig1.yaml (fixed).
 
-输入（只读）：/Volumes/INTENSO_BIG/HEST1k/{patches,st}/{id}
-输出：results/he/A8/hest/{id}.npz
-      features  斑点图块 × 1536（float16）；coords（全分辨率像素坐标）；pixel_size（µm/px）
-      prog_umi / pan_umi / total_umi（非腺泡非内分泌）  每个斑点的计数，用于之后的区域标签
-      genes_prog_present / genes_pan_present  该样本表达矩阵里能找到的程序 / 泛 CAF 基因数
-低负载：nice 19、torch 2 线程、每批 32 张、批间暂停 0.05 s、1 分钟负载 > 8 时暂停。可反复运行（已完成的样本跳过）。
+Input (read only): /Volumes/INTENSO_BIG/HEST1k/{patches,st}/{id}
+Output: results/he/A8/hest/{id}.npz
+      features  spot tiles × 1536 (float16); coords (full-resolution pixel coordinates); pixel_size (µm/px)
+      prog_umi / pan_umi / total_umi (non-acinar non-endocrine)  per-spot counts for region labels
+      genes_prog_present / genes_pan_present  number of programme / pan-CAF genes found in the sample's expression matrix
+Low load: nice 19, 2 torch threads, batches of 32, 0.05 s pause between batches, pause while 1-min load > 8. Re-runnable (completed samples skipped).
 """
 from __future__ import annotations
 

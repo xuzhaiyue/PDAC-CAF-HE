@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 清理后的间质层 → CAF 层：每轮整合后按 config.cluster_exclusion 规则标记，排除后重跑，直至无亚群被标记。
-# 每一轮的 cluster_flags.tsv 都保留，用于补充材料。
+# Cleaned mesenchymal layer → CAF layer: after each integration, clusters are flagged with config.cluster_exclusion, excluded and re-run until none are flagged.
+# cluster_flags.tsv of every round is kept for the supplementary material.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SCVI=~/miniforge3/envs/pdac_scvi/bin/python

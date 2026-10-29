@@ -1,12 +1,12 @@
-"""修订 A9 第 1 步：公开胰腺癌 Visium 样本（GEO）的斑点图块特征与计数（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 A9（已冻结）。
+"""Amendment A9 step 1: spot-tile features and counts for public PDAC Visium sections (GEO) (hemorph environment, MPS). Rules in A9 of config/fig1.yaml (fixed).
 
-输入（只读）：/Volumes/INTENSO_BIG/PDAC_spatial_public/{GSE274557,GSE327056,GSE211895}/samples/{GSM}/
-处理：读取全分辨率原图（jpg / tif，gzip）、斑点坐标（tissue_positions*.csv，表头有 / 无两种）、表达矩阵（h5 或 mtx）；
-      原图与 spaceranger 全分辨率坐标的比例由 hires 图尺寸 / tissue_hires_scalef 核对，不一致时按比例换算坐标与 µm/px；
-      以每个组织内斑点为中心切 112 µm 方块 → 224 px → UNI2-h（与 HEST / A8 一致）。
-对齐质控：组织内斑点图块的平均 HSV 饱和度应明显高于组织外斑点（比值记录在 qc 中）。
-输出：results/he/A9/geo/{GSM}.npz（字段与 A8 的 HEST 特征文件一致，另加 patient、tissue、treatment），results/he/A9/geo_qc.tsv
-负载：先按用户要求 nice 10 / 8 线程运行，用户随后要求降低 → nice 19、2 线程、批量 32、批间暂停、负载 > 8 时暂停（已完成的样本不重做）。
+Input (read only): /Volumes/INTENSO_BIG/PDAC_spatial_public/{GSE274557,GSE327056,GSE211895}/samples/{GSM}/
+Processing: full-resolution image (jpg / tif, gzip), spot coordinates (tissue_positions*.csv, with or without header), expression matrix (h5 or mtx);
+      the ratio between the image and spaceranger full-resolution coordinates is checked via hires size / tissue_hires_scalef and coordinates and µm/px are rescaled if needed;
+      a 112 µm square is cut around every in-tissue spot → 224 px → UNI2-h (as for HEST / A8).
+Alignment QC: mean HSV saturation of in-tissue spot tiles should be clearly higher than of off-tissue spots (ratio recorded in qc).
+Outputs: results/he/A9/geo/{GSM}.npz (same fields as the A8 HEST files plus patient, tissue, treatment), results/he/A9/geo_qc.tsv
+Load: nice 19, 2 threads, batches of 32, pauses between batches, pause while load > 8 (completed samples are not redone).
 """
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ def read_image(p: Path) -> np.ndarray:
 
 
 def main():
-    os.nice(19)                      # 用户要求降低负载：nice 19、2 线程、批量 32、批间暂停、负载 > 8 时暂停
+    os.nice(19)                      # low load: nice 19, 2 threads, batches of 32, pauses between batches, pause while load > 8
     torch.set_num_threads(2)
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
     model, prep = load_model(dev)

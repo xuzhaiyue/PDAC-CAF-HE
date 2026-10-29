@@ -1,14 +1,14 @@
-"""下载公开的胰腺癌空间转录组（带全分辨率 H&E）到共享位置（用户 2026-10-21 同意；多个课题共用）。hemorph 环境。
+"""Download public PDAC spatial transcriptomics with full-resolution H&E to a shared location. hemorph environment.
 
-数据集：
-  GSE274557  转移性胰腺癌空间图谱（快速尸检；原发 + 肝 / 肺 / 腹膜转移；55 个样本，13 名患者）  全部样本
-  GSE327056  人 PDAC Visium（4 个样本）                                                         全部样本
-  GSE211895  只取 3 例人胰腺癌（DonorA/B/C，FFPE，探针法）；其余为大鼠 / 小鼠样本，不下载
-布局：/Volumes/INTENSO_BIG/PDAC_spatial_public/{GSE}/samples/{GSM}/<GEO 原始文件名>
-      {GSE}/metadata/samples.tsv（GSM、标题、全部 characteristics、文件列表）、series.txt（GEO 系列描述）
-      {GSE}/_manifest/files.tsv（URL、字节数、服务器字节数、sha256、时间）
-      根目录 README.md
-可反复运行：大小与服务器一致的文件跳过。
+Datasets:
+  GSE274557  metastatic PDAC spatial atlas (rapid autopsy; primary + liver / lung / peritoneal metastases; 55 samples, 13 patients)  all samples
+  GSE327056  human PDAC Visium (4 samples)                                                                   all samples
+  GSE211895  only the 3 human PDAC samples (DonorA/B/C, FFPE, probe-based); rat / mouse samples not downloaded
+Layout: /Volumes/INTENSO_BIG/PDAC_spatial_public/{GSE}/samples/{GSM}/<original GEO file name>
+      {GSE}/metadata/samples.tsv (GSM, title, all characteristics, file list), series.txt (GEO series description)
+      {GSE}/_manifest/files.tsv (URL, bytes, server bytes, sha256, time)
+      README.md at the root
+Re-runnable: files whose size matches the server are skipped.
 """
 from __future__ import annotations
 

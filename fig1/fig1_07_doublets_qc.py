@@ -1,11 +1,11 @@
-"""Fig 1 step 07 — 细胞层面质控与双联体检测（pdac_scvi 环境，需要 scikit-image 做 Scrublet 自动阈值）。
+"""Fig 1 step 07 — cell-level QC and doublet detection (pdac_scvi environment; scikit-image needed for Scrublet automatic thresholds).
 
-双联体必须在每个样本的全部细胞上检测（模拟 CAF 与上皮/免疫等的混合），所以在 global_full_raw 上做。
-样本单位 = 患者 × 条件（原始数据未保留测序文库编号；同一患者多个文库时会略微低估跨文库差异）。
+Doublets must be detected on all cells of each sample (simulating mixtures of CAFs with epithelial/immune cells), so this runs on global_full_raw.
+Sample unit = patient × condition (library IDs were not retained in the raw data; cross-library differences within a patient are slightly underestimated).
 
 Output: results/fig1/qc/
-  cell_qc.tsv.gz        每个细胞：sample, doublet_score, predicted_doublet, n_genes, n_umi, pct_mt
-  doublet_summary.tsv   各数据集 / 谱系的双联体比例
+  cell_qc.tsv.gz        per cell: sample, doublet_score, predicted_doublet, n_genes, n_umi, pct_mt
+  doublet_summary.tsv   doublet fraction per dataset / lineage
 """
 from __future__ import annotations
 

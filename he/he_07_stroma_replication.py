@@ -1,14 +1,14 @@
-"""诊断：按范文 StRoMA 的口径复现（hemorph 环境）。不改变主分析，只用来区分"流程/数据问题"与"病例纳入/指标算法差异"。
+"""Diagnostic: replication following the StRoMA definitions (hemorph environment). Does not change the main analysis; separates pipeline/data issues from case-selection/metric differences.
 
-口径（照范文 Methods）：
-  队列  TCGA 全部 PAAD 原发肿瘤（样本类型 01，不排除非导管型），每名患者一个表达谱；范文为 178 例
-  目标  COL12A1、LOX、LOXL2：log2 表达在队列内逐基因 z 标准化后取平均（EB++ 已是 log2(norm+1)）
-  交叉验证  StratifiedKFold 10 折（按中位数二分分层），训练折内再标准化目标
-  指标  每折 Spearman 取平均 ± SD（范文的汇报方式）；同时报告合并折外预测的 Spearman；
-        AUC 按 Z > 0 二分（每折平均与合并两种）
-模型：岭回归（胃癌流程，均值池化，自提全切片特征）。对照：同样设置只用 147 例导管腺癌。
-对号检查：表达条形码与切片条形码一致性；H&E 应能轻松预测的量（内分泌 / 腺泡含量、非导管组织学类型）。
-输出：results/he/stroma_replication/
+Definitions (following the StRoMA Methods):
+  cohort  all TCGA PAAD primary tumours (sample type 01, non-ductal not excluded), one expression profile per patient; 178 in the original study
+  target  COL12A1, LOX, LOXL2: log2 expression z-scored per gene within the cohort, then averaged (EB++ is already log2(norm+1))
+  cross-validation  StratifiedKFold 10 folds (stratified on the median split), targets re-standardised within training folds
+  metrics  per-fold Spearman mean ± SD (as reported in the original study); Spearman of pooled out-of-fold predictions also reported;
+        AUC for Z > 0 (per-fold mean and pooled)
+Model: ridge regression (mean pooling, self-extracted whole-slide features). Comparison: same settings on the 147 ductal adenocarcinomas only.
+Sanity checks: expression and slide barcodes agree; quantities H&E should predict easily (endocrine / acinar content, non-ductal histology).
+Output: results/he/stroma_replication/
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from sklearn.model_selection import StratifiedKFold
 
 import he_03_ridge_gc_protocol as A
 
-A.CACHE_T = A.HE / "cache_own"          # 用自己提取的 TCGA 全切片特征
+A.CACHE_T = A.HE / "cache_own"          # self-extracted TCGA whole-slide features
 OUT = A.HE / "stroma_replication"
 OUT.mkdir(parents=True, exist_ok=True)
 CACHE_OWN = A.HE / "cache_own" / "tcga"

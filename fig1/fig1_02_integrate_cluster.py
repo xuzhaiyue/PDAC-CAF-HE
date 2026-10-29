@@ -1,13 +1,13 @@
-"""Fig 1 step 02 — 成纤维细胞整合与聚类（pdac_scvi 环境）。
+"""Fig 1 step 02 — fibroblast integration and clustering (pdac_scvi environment).
 
-Input : results/fig1/fibro_raw.h5ad（只用 in_cap 细胞，每患者×条件 ≤ 500）
-        第二轮：--exclude 去掉上一轮的非 CAF 亚群（周细胞、平滑肌、低质量、污染）后，只用 CAF 重新整合
-Method: seurat_v3 HVG（按数据集）→ scVI（batch = 患者，协变量 = 数据集）→ kNN → Leiden（多分辨率）→ UMAP
+Input : results/fig1/fibro_raw.h5ad (in_cap cells only, <= 500 per patient × condition)
+        second round: --exclude removes non-CAF clusters of the previous round (pericytes, smooth muscle, low quality, contamination) and re-integrates CAFs only
+Method: seurat_v3 HVG (per dataset) → scVI (batch = patient, covariate = dataset) → kNN → Leiden (multiple resolutions) → UMAP
 Output: results/fig1/integrate/
-  fibro_integrated.h5ad       latent (X_scVI), UMAP, leiden_*，log1p 表达
-  scvi_model/                 训练好的 scVI 模型（之后投射其余细胞）
-  cluster_profile_<res>.tsv   每个亚群：大小、数据集/条件构成、污染标志评分、CAF 分型评分、CTHRC1 表达
-  markers_<res>.tsv           每个亚群 top 标志基因（Wilcoxon）
+  fibro_integrated.h5ad       latent (X_scVI), UMAP, leiden_*, log1p expression
+  scvi_model/                 trained scVI model (used to project the remaining cells)
+  cluster_profile_<res>.tsv   per cluster: size, dataset/condition composition, contamination marker scores, CAF subtype scores, CTHRC1 expression
+  markers_<res>.tsv           top marker genes per cluster (Wilcoxon)
   umap_*.png, dotplot_<res>.png
 """
 from __future__ import annotations

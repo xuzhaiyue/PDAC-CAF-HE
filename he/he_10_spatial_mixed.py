@@ -1,10 +1,10 @@
-"""修订 A5：混合监督（I1+I2）、只看间质（stroma_only）与空间验证（hemorph 环境，MPS）。规则见 config/fig1.yaml 的 A5（已冻结）。
+"""Amendment A5: mixed supervision (I1+I2), stroma_only and spatial validation (hemorph environment, MPS). Rules in A5 of config/fig1.yaml (fixed).
 
-1) 空间验证：I1_bulk / B2 / ridge_tile 只用 TCGA 训练（3 个种子），I1_I2 用留一患者（TCGA + 另外 3 例 HD），
-   在 4 例 Visium HD 上比较区域层面（150 µm 主、100 µm 敏感性）预测与实测相对状态的 Spearman ρ。
-2) bulk 评估：I1_I2（TCGA + 全部 4 例 HD）与 stroma_only，在 TCGA 5 折与 CPTAC 外部上报告 Spearman 与 AUC。
-用法：python he_10_spatial_mixed.py [--quick]
-输出：results/he/A5/{spatial.tsv, spatial_tiles_<sample>.tsv.gz, bulk.tsv}
+1) Spatial validation: I1_bulk / B2 / ridge_tile trained on TCGA only (3 seeds), I1_I2 leave-one-patient-out (TCGA + the other 3 HD sections);
+   region-level (150 µm primary, 100 µm sensitivity) Spearman ρ between predicted and measured relative state in the 4 Visium HD sections.
+2) Bulk evaluation: I1_I2 (TCGA + all 4 HD sections) and stroma_only, Spearman and AUC in TCGA 5-fold and CPTAC external.
+Usage: python he_10_spatial_mixed.py [--quick]
+Outputs: results/he/A5/{spatial.tsv, spatial_tiles_<sample>.tsv.gz, bulk.tsv}
 """
 from __future__ import annotations
 

@@ -1,10 +1,10 @@
-"""修订 A1：胃癌项目流程的岭回归（hemorph 环境）。规则见 config/fig1.yaml 的 he_amendments.A1_gc_protocol（已冻结）。
+"""Amendment A1: ridge-regression protocol (hemorph environment). Rules in he_amendments.A1_gc_protocol of config/fig1.yaml (fixed).
 
-标签：基因在训练折内 z 标准化后取平均；状态 = 对泛 CAF 的残差（主要）或减法（对照）。
-特征：切片内图块均值 → 患者内切片等权平均。模型：StandardScaler + Ridge，GridSearchCV（内层 4 折）。
-TCGA 5 折 × 5 次重复（与第一轮相同的折）；CPTAC：全部 TCGA 训练后外部预测（标签用 CPTAC 自身的基因统计量）。
-用法：python he_03_ridge_gc_protocol.py [--own-tcga]
-输出：results/he/A1（或 A1_ownTCGA）/{oof_tcga.tsv, metrics_tcga.tsv, pred_cptac.tsv, metrics_cptac.tsv, decoupling_cptac.tsv}
+Labels: gene z-scores (fitted in training folds) averaged; state = residual on pan-CAF (primary) or subtraction (comparison).
+Features: tile mean within slide → equal-weight mean of slides within patient. Model: StandardScaler + Ridge, GridSearchCV (inner 4-fold).
+TCGA 5-fold × 5 repeats (same folds as round one); CPTAC: external prediction after training on all TCGA (labels use CPTAC's own gene statistics).
+Usage: python he_03_ridge_gc_protocol.py [--own-tcga]
+Outputs: results/he/A1 (or A1_ownTCGA)/{oof_tcga.tsv, metrics_tcga.tsv, pred_cptac.tsv, metrics_cptac.tsv, decoupling_cptac.tsv}
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ PROJ = Path(__file__).resolve().parents[1]
 CFG = yaml.safe_load((PROJ / "config" / "fig1.yaml").read_text())
 SEED = CFG["random_seed"]
 HE = PROJ / "results" / "he"
-OWN = "--own-tcga" in sys.argv               # 修订 A3：TCGA 用自己提取的全切片特征（CPTAC 仍为 Mahmood 特征）
+OWN = "--own-tcga" in sys.argv               # amendment A3: TCGA uses self-extracted whole-slide features (CPTAC keeps the pre-extracted features)
 OUT = HE / ("A1_ownTCGA" if OWN else "A1")
 OUT.mkdir(parents=True, exist_ok=True)
 CACHE = HE / "cache"

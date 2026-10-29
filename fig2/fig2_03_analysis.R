@@ -1,6 +1,6 @@
-# Figure 2 预设分析（规则见 config/fig1.yaml 的 fig2，读取生存数据前已冻结）。
-# A 相对状态与基质多少的关系；B 总生存 Cox（主要）；C 各比较得分的同模型比较；D 肿瘤内在特征关联（探索性）
-# 输出：results/fig2/{A_decoupling,B_cox,C_head_to_head,D_biology,verdict}.tsv
+# Prespecified bulk analyses (rules in the fig2 section of config/fig1.yaml, fixed before survival data were read).
+# A relative state vs amount of stroma; B overall-survival Cox (primary); C same-model comparison of scores; D tumour-intrinsic associations (exploratory)
+# Outputs: results/fig2/{A_decoupling,B_cox,C_head_to_head,D_biology,verdict}.tsv
 suppressMessages(library(survival))
 out <- "results/fig2"
 z <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)

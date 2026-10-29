@@ -1,7 +1,7 @@
-# 修订 A9（次要终点）：A9 胰腺癌空间微调模型预测的 CAF 状态与总生存，规则同 A7（单因素、年龄 + 分期多因素、TCGA + CPTAC 固定效应合并）。
-# 预测来源：results/he/A9/patient_preds_{TCGA,CPTAC}_{all70,own4_only,primary_only}.tsv（模型未见过 TCGA / CPTAC，两队列均为外部预测）
-#           对照：A8 finetuned_all8（results/he/A8/patient_preds_finetuned_{cohort}.tsv）
-# 输出：results/he/A9/prognosis_{per_cohort,pooled}.tsv
+# Amendment A9 (secondary endpoint): CAF state predicted by the A9 PDAC spatial fine-tuned models and overall survival; rules as A7 (univariable, age + stage multivariable, TCGA + CPTAC fixed-effect pooling).
+# Predictions: results/he/A9/patient_preds_{TCGA,CPTAC}_{all70,own4_only,primary_only}.tsv (models never saw TCGA / CPTAC; both cohorts are external predictions)
+#           comparator: A8 finetuned_all8 (results/he/A8/patient_preds_finetuned_{cohort}.tsv)
+# Outputs: results/he/A9/prognosis_{per_cohort,pooled}.tsv
 suppressMessages({library(survival); library(metafor)})
 he <- "results/he"; out <- file.path(he, "A9")
 z <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)

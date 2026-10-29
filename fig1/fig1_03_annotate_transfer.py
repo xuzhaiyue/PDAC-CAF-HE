@@ -1,17 +1,17 @@
-"""Fig 1 step 03 — 全局大类注释 → 标签传递到全部细胞 → 提取间质谱系（pdac_scvi 环境）。
+"""Fig 1 step 03 — global lineage annotation → label transfer to all cells → extraction of mesenchymal lineages (pdac_scvi environment).
 
-1. 抽样全局图谱（integrate_global）中，每个 Leiden 亚群按 lin_* 标志基因评分自动注释：
-   最高分谱系；最高分 < min_score 或与第二名差距 < min_margin 记为 Ambiguous；
-   config 中 global_annotation_overrides 可按亚群手动修正（并在表中留痕）。
-2. 用同一个 scVI 模型把全部 41.8 万个细胞投到潜在空间，kNN（k=15）从已注释的抽样细胞传递标签，记录置信度。
-3. 取 Fibroblast / Pericyte / Smooth_muscle 且置信度 ≥ min_conf 的细胞 → mesenchymal_raw.h5ad
-   （每患者×条件抽样上限 max_cells_per_patient，供下一层 CAF 分析）。
+1. In the subsampled global atlas (integrate_global), each Leiden cluster is annotated automatically from lin_* marker scores:
+   the top-scoring lineage; top score < min_score or margin to the second < min_margin is called Ambiguous;
+   global_annotation_overrides in the config can correct clusters manually (recorded in the table).
+2. The same scVI model projects all 418,000 cells into the latent space; kNN (k=15) transfers labels from annotated subsampled cells, with confidence.
+3. Fibroblast / Pericyte / Smooth_muscle cells with confidence >= min_conf → mesenchymal_raw.h5ad
+   (subsampled to max_cells_per_patient per patient × condition, for the CAF layer).
 
 Outputs: results/fig1/annotate_global/
-  cluster_annotation.tsv        每个亚群：各谱系评分、自动注释、是否被手动修正
-  global_full_annotation.tsv.gz   全部细胞：数据集、患者、条件、作者标注、本研究谱系、置信度
-  lineage_vs_author.tsv         本研究注释与作者标注的对照（补充材料）
-  lineage_composition.tsv       各数据集 / 条件的谱系构成
+  cluster_annotation.tsv        per cluster: lineage scores, automatic annotation, manual correction flag
+  global_full_annotation.tsv.gz   all cells: dataset, patient, condition, author label, study lineage, confidence
+  lineage_vs_author.tsv         study annotation versus author labels (supplementary)
+  lineage_composition.tsv       lineage composition per dataset / condition
 results/fig1/mesenchymal_raw.h5ad
 """
 from __future__ import annotations

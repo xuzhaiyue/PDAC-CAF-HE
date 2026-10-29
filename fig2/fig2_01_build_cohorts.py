@@ -1,12 +1,12 @@
-"""Figure 2 队列构建（hemorph 环境）。规则见 config/fig1.yaml 的 fig2（读取生存数据前已冻结）。
+"""Bulk cohort assembly (hemorph environment). Rules in the fig2 section of config/fig1.yaml (fixed before survival data were read).
 
-TCGA-PAAD：原发肿瘤（样本类型 01）、组织学 = 导管腺癌（TCGA-CDR），每名患者一个样本；表达 = EB++ log2(norm+1)
-CPTAC-PDA：肿瘤 mRNA（RSEM UQ log2），组织学 = PDAC
-输出（results/fig2/）：
-  {cohort}_expr.tsv.gz      基因 × 样本（供 ESTIMATE）
-  {cohort}_scores.tsv       各基因集得分（基因集均值；相对 = 减去泛 CAF；Moffitt basal − classical；MPAS）
-  {cohort}_clinical.tsv     年龄、分期、生存、KRAS 状态（CPTAC 另含病理估计的基质比例、肿瘤细胞比例）
-原始文件只读，不复制。
+TCGA-PAAD: primary tumour (sample type 01), histology = ductal adenocarcinoma (TCGA-CDR), one sample per patient; expression = EB++ log2(norm+1)
+CPTAC-PDA: tumour mRNA (RSEM UQ log2), histology = PDAC
+Outputs (results/fig2/):
+  {cohort}_expr.tsv.gz      genes × samples (for ESTIMATE)
+  {cohort}_scores.tsv       gene-set scores (gene-set mean; relative = minus pan-CAF; Moffitt basal − classical; MPAS)
+  {cohort}_clinical.tsv     age, stage, survival, KRAS status (CPTAC also has pathology-estimated stromal and tumour-cell fractions)
+Raw files are read only, never copied.
 """
 from __future__ import annotations
 

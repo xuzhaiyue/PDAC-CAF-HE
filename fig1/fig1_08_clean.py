@@ -1,11 +1,11 @@
-"""Fig 1 step 08 — 清理（hemorph 环境）。两个子命令：
+"""Fig 1 step 08 — cleaning (hemorph environment). Two subcommands:
 
-  cells   间质细胞的细胞层面过滤：Scrublet 双联体 + 每个数据集内的 MAD 质控 + 线粒体比例
-          → results/fig1/mesenchymal_clean_raw.h5ad，results/fig1/qc/removed_cells.tsv.gz
-  flag    读一个整合后的 h5ad，按 config.cluster_exclusion 的数值规则标记非 CAF / 低质量亚群
-          → <integrate_dir>/cluster_flags.tsv，并打印 --exclude 参数
+  cells   cell-level filtering of mesenchymal cells: Scrublet doublets + within-dataset MAD QC + mitochondrial fraction
+          → results/fig1/mesenchymal_clean_raw.h5ad, results/fig1/qc/removed_cells.tsv.gz
+  flag    read an integrated h5ad and flag non-CAF / low-quality clusters with the numerical rules in config.cluster_exclusion
+          → <integrate_dir>/cluster_flags.tsv, and print the --exclude argument
 
-所有被去掉的细胞及原因都保留记录（补充表）。
+Every removed cell and the reason are recorded (supplementary table).
 """
 from __future__ import annotations
 

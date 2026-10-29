@@ -1,8 +1,8 @@
-"""GEO 生存队列构建（hemorph 环境）。规则见 config/fig1.yaml 的 fig2_meta（计算生存关联前已冻结）。
+"""GEO survival cohort assembly (hemorph environment). Rules in the fig2_meta section of config/fig1.yaml (fixed before survival associations were computed).
 
-每个队列：读取 series matrix（只读）→ 探针映射到基因（同基因取平均表达最高的探针）→ 原发肿瘤样本 →
-解析 OS（统一为月）→ 与 fig2 相同的得分定义。
-输出：results/fig2/geo/{cohort}_expr.tsv.gz、_scores.tsv、_clinical.tsv
+Per cohort: read series matrix (read only) → map probes to genes (highest mean-expression probe per gene) → primary tumour samples →
+parse OS (in months) → same score definitions as the TCGA/CPTAC analysis.
+Outputs: results/fig2/geo/{cohort}_expr.tsv.gz, _scores.tsv, _clinical.tsv
 """
 from __future__ import annotations
 

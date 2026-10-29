@@ -1,6 +1,6 @@
-# 修订 A7：H&E 预测的 CAF 状态与总生存（规则见 config/fig1.yaml 的 A7，计算前已冻结）。
-# 预测来源：A2（I1、B2）与 A1_ownTCGA（岭回归）；临床：results/fig2/{tcga,cptac}_clinical.tsv
-# 输出：results/he/A7/{per_cohort.tsv, pooled.tsv}
+# Amendment A7: H&E-predicted CAF state and overall survival (rules in A7 of config/fig1.yaml, fixed before computation).
+# Predictions: A2 (I1, B2) and A1_ownTCGA (ridge); clinical: results/fig2/{tcga,cptac}_clinical.tsv
+# Outputs: results/he/A7/{per_cohort.tsv, pooled.tsv}
 suppressMessages({library(survival); library(metafor)})
 he <- "results/he"; out <- file.path(he, "A7"); dir.create(out, showWarnings = FALSE)
 z <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)

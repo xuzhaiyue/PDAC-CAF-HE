@@ -1,6 +1,6 @@
-# 多队列生存 meta 分析（规则见 config/fig1.yaml 的 fig2_meta，计算前已冻结）。
-# 1) GEO 队列 ESTIMATE 基质评分；2) 每队列 Cox（单因素主分析；次要模型 + ESTIMATE 基质 + basal−classical）；
-# 3) 随机效应（REML）与固定效应合并，I²。TCGA / CPTAC 用同样模型重新计算后一起合并。
+# Multi-cohort survival meta-analysis (rules in the fig2_meta section of config/fig1.yaml, fixed before computation).
+# 1) ESTIMATE stromal scores for GEO cohorts; 2) per-cohort Cox (univariable primary; secondary model + ESTIMATE stroma + basal−classical);
+# 3) random-effects (REML) and fixed-effect pooling, I². TCGA / CPTAC are recomputed with the same models and pooled together.
 suppressMessages({library(survival); library(metafor); library(estimate)})
 out <- "results/fig2"; geo <- file.path(out, "geo")
 z <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)

@@ -1,11 +1,11 @@
-"""修订 A9：用约 70 个胰腺癌空间样本微调泛癌预训练模型（hemorph 环境，MPS，低负载）。规则见 config/fig1.yaml 的 A9（已冻结）。
+"""Amendment A9: fine-tune the pan-cancer pretrained model on ~70 PDAC spatial sections (hemorph environment, MPS, low load). Rules in A9 of config/fig1.yaml (fixed).
 
-1) 重新训练 A8 泛癌预训练模型（156 个样本，3 个种子，与 A8 相同种子），这次保存权重
-2) 留一患者：每组患者留出，其余全部胰腺癌空间样本微调（3 个种子），测留出患者的全部切片
-3) 全部样本微调 → TCGA / CPTAC 病人层面（Spearman、AUC），保存逐病人预测
-4) 消融：(a) 只用自有 4 个 HD；(b) 只用原发灶（不含肝 / 肺 / 腹膜转移）；(c) 全部（= 3）
-输出：results/he/A9/{models/, lopo_spatial.tsv, patient_preds_{cohort}_{tag}.tsv, patient_level.tsv, ablation_spatial.tsv}
-负载：nice 19、2 线程（同 A8）。
+1) Retrain the A8 pan-cancer model (156 samples, 3 seeds, same seeds as A8), this time saving weights
+2) Leave one patient out: hold out each patient group, fine-tune on all other PDAC spatial sections (3 seeds), test on all sections of the held-out patient
+3) Fine-tune on all sections → TCGA / CPTAC patient level (Spearman, AUC), per-patient predictions saved
+4) Ablation: (a) the 4 PDAC Visium HD sections only; (b) primary tumours only (no liver / lung / peritoneal metastases); (c) all (= 3)
+Outputs: results/he/A9/{models/, lopo_spatial.tsv, patient_preds_{cohort}_{tag}.tsv, patient_level.tsv, ablation_spatial.tsv}
+Load: nice 19, 2 threads (as A8).
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ import he_14_pancancer_pretrain as P
 
 M, A = P.M, P.A
 GEO = A.HE / "A9" / "geo"
-OUT = A.HE / ("A9_quick_discard" if P.QUICK else "A9")       # --quick：只检查流程，输出另存并删除
+OUT = A.HE / ("A9_quick_discard" if P.QUICK else "A9")       # --quick: pipeline check only, written elsewhere and deleted
 (OUT / "models").mkdir(parents=True, exist_ok=True)
 METASTASIS = ("Liver metastasis", "Lung metastasis", "Peritoneal metastasis")
 
@@ -34,7 +34,7 @@ def load_any(path: Path, sid: str):
     s = P.load_sample(sid)
     z = np.load(path / f"{sid}.npz", allow_pickle=True)
     s["patient"] = str(z["patient"]) if "patient" in z.files and str(z["patient"]) not in ("", "nan", "None") else sid
-    s["patient"] = re.sub(r"_Pri\d+$", "", s["patient"])   # GSE274557 补充原发灶（Pt-6_Pri2 等）与同一患者同组（冻结规则）
+    s["patient"] = re.sub(r"_Pri\d+$", "", s["patient"])   # additional GSE274557 primaries (Pt-6_Pri2 etc.) grouped with the same patient (fixed rule)
     s["tissue"] = str(z["tissue"]) if "tissue" in z.files else "Primary"
     s["treatment"] = str(z["treatment"]) if "treatment" in z.files else ""
     return s
@@ -148,7 +148,7 @@ def main():
     lv, abl = [], []
     for tag, ft in sets.items():
         fs = [OUT / "models" / f"finetune_{tag}_seed{k}.pt" for k in range(len(base))]
-        if all(f.exists() for f in fs):     # 分组修正后重跑：不依赖分组的模型直接复用
+        if all(f.exists() for f in fs):     # re-run after the grouping correction: models that do not depend on grouping are reused
             ms = []
             for f in fs:
                 m = P.Head().to(P.DEV); m.load_state_dict(torch.load(f)); m.eval(); ms.append(m)

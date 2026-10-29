@@ -32,3 +32,4 @@ Analysis rules and their order are recorded in `config/fig1.yaml`. Identifiers A
 - Environments: `hemorph` (general analyses and H&E), `pdac_scvi` (scVI; set `NUMBA_THREADING_LAYER=workqueue`), `scRNA` and R.
 - Scripts in `he/` import each other; run them from inside `he/`.
 - Developed on Apple silicon with PyTorch MPS.
+- Some scripts verify SHA-256 hashes of the authors' original intermediate files; when re-running from scratch, regenerate those files and update the recorded hashes.
