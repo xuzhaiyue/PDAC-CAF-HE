@@ -1,0 +1,220 @@
+{
+  "source_commit": "76b4f57e5807f1967367047436458b0c5321d936",
+  "sources": [
+    {
+      "file": "fig1/fig1_00_build_global.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "bbac2dcbb8cae3d663e90ee414472ec2d19b313206c1feeb855be006f18b6cf3"
+    },
+    {
+      "file": "fig1/fig1_01_build_inputs.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "e77aa81fe3e50eac04e09ebd6fb6e6aaf5f2f68273c61b065a37ed0ab327be3a"
+    },
+    {
+      "file": "fig1/fig1_02_integrate_cluster.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "11aa00c7f59380125e8372d63d2f86012b2ba8f783474adfd34d19e7d3bef1f2"
+    },
+    {
+      "file": "fig1/fig1_03_annotate_transfer.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "def866ba8381ffe246315ac1b3f78be74533203b2759f5edbe055c63f269f9d8"
+    },
+    {
+      "file": "fig1/fig1_07_doublets_qc.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "03337179442378fc9afca65643d8fb705a6ae70b7d37f9d655cd823577e290e8"
+    },
+    {
+      "file": "fig1/fig1_08_clean.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "ebfa7ccfb2a86cb311a608b0fa56100a26808b4aa54fa5bd164111c0593b4268"
+    },
+    {
+      "file": "fig1/fig1_09_stability.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "9e2e2ade21c60d8c783e8420f3599296be27f6b26aeabfe2dfbe76b7df69bbde"
+    },
+    {
+      "file": "fig1/fig1_10_removed_summary.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "65edbfe437fa69af422dffdc7916b7bd2de929d1147c2c16ad3e8f2634fe61d6"
+    },
+    {
+      "file": "fig1/fig1_05_signature.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "1ba56f5ba0b4ca94b7e5377dd7f04a7d145ff96828c59c7310726fd955b03765"
+    },
+    {
+      "file": "fig1/fig1_15_external_validation.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "b88946d009089443626e6634bfdc83d0e30f3810e917da2941c340a87e7cec56"
+    },
+    {
+      "file": "fig1/fig1_17_pseudobulk_decoupling.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "7555178c222eba6a58786507fbfbf0940e76c213bbe74f9fbbd7c96fe33ef03e"
+    },
+    {
+      "file": "fig1/fig1_14_published_signatures.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "008591f239d336189cf125ece0cf1ee786dd9757fcfbdc796e54e24e103dc13a"
+    },
+    {
+      "file": "fig1/fig1_06_panels.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "96a20b6341be5334ed1583cf1a02a5b5be59f6a23260b9969d6a0e915b9b3c78"
+    },
+    {
+      "file": "fig1/fig1_12_panels_v2.py",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "8586529bda642b93eae9af76ab5c5991ab3009b8e1a80b81ed4bd9670958d228"
+    },
+    {
+      "file": "fig1/run_clean_loop.sh",
+      "commit": "76b4f57e5807f1967367047436458b0c5321d936",
+      "sha256": "4db3ffebdfe11b7645603220f953b9c5290f117a45e505b49c39319ffeb33984"
+    }
+  ],
+  "function_prefixes": {
+    "inputs": {
+      "CAP": "inputs_CAP",
+      "CFG": "inputs_CFG",
+      "OUT": "inputs_OUT",
+      "PANIN": "inputs_PANIN",
+      "RNG": "inputs_RNG",
+      "capped_index": "inputs_capped_index",
+      "from_h5ad": "inputs_from_h5ad",
+      "from_mtx": "inputs_from_mtx",
+      "main": "inputs_main"
+    },
+    "legacy": {
+      "CFG": "legacy_CFG",
+      "OUT": "legacy_OUT",
+      "PANIN": "legacy_PANIN",
+      "RNG": "legacy_RNG",
+      "counts_rows": "legacy_counts_rows",
+      "load_h5ad_dataset": "legacy_load_h5ad_dataset",
+      "load_mtx_dataset": "legacy_load_mtx_dataset",
+      "main": "legacy_main",
+      "pseudobulk": "legacy_pseudobulk"
+    },
+    "integration": {
+      "CFG": "integration_CFG",
+      "MAIN_RES": "integration_MAIN_RES",
+      "OUT": "integration_OUT",
+      "RES": "integration_RES",
+      "main": "integration_main"
+    },
+    "annotation": {
+      "CFG": "annotation_CFG",
+      "MESENCHYMAL": "annotation_MESENCHYMAL",
+      "OUT": "annotation_OUT",
+      "ROOT": "annotation_ROOT",
+      "auto_annotate": "annotation_auto_annotate",
+      "main": "annotation_main"
+    },
+    "qc": {
+      "CFG": "qc_CFG",
+      "MIN_CELLS_FOR_SCRUBLET": "qc_MIN_CELLS_FOR_SCRUBLET",
+      "OUT": "qc_OUT",
+      "ROOT": "qc_ROOT",
+      "main": "qc_main"
+    },
+    "clean": {
+      "CFG": "clean_CFG",
+      "Q": "clean_Q",
+      "ROOT": "clean_ROOT",
+      "X_RULES": "clean_X_RULES",
+      "cmd_cells": "clean_cmd_cells",
+      "cmd_flag": "clean_cmd_flag",
+      "mad": "clean_mad",
+      "main": "clean_main"
+    },
+    "stability": {
+      "CFG": "stability_CFG",
+      "D": "stability_D",
+      "TARGET": "stability_TARGET",
+      "best_match": "stability_best_match",
+      "main": "stability_main"
+    },
+    "removal": {
+      "CFG": "removal_CFG",
+      "ROOT": "removal_ROOT",
+      "ROUNDS": "removal_ROUNDS",
+      "main": "removal_main"
+    },
+    "signature": {
+      "CFG": "signature_CFG",
+      "DATASETS": "signature_DATASETS",
+      "OUT": "signature_OUT",
+      "PATIENT_LFC": "signature_PATIENT_LFC",
+      "ROOT": "signature_ROOT",
+      "S": "signature_S",
+      "contribution": "signature_contribution",
+      "group_sum": "signature_group_sum",
+      "lineage_cpm": "signature_lineage_cpm",
+      "log2cpm": "signature_log2cpm",
+      "main": "signature_main",
+      "paired_de": "signature_paired_de",
+      "pooled_test": "signature_pooled_test",
+      "score": "signature_score",
+      "select_state_genes": "signature_select_state_genes",
+      "specificity": "signature_specificity"
+    },
+    "external": {
+      "CAF_NAMES": "external_CAF_NAMES",
+      "CFG": "external_CFG",
+      "COMPARE": "external_COMPARE",
+      "EV": "external_EV",
+      "OUT": "external_OUT",
+      "PROG": "external_PROG",
+      "PROJ": "external_PROJ",
+      "PUB": "external_PUB",
+      "RNG": "external_RNG",
+      "ROOT": "external_ROOT",
+      "TARGET": "external_TARGET",
+      "annotate_lineage": "external_annotate_lineage",
+      "auroc": "external_auroc",
+      "centroids": "external_centroids",
+      "discovery_centroids": "external_discovery_centroids",
+      "flag_clusters": "external_flag_clusters",
+      "gscore": "external_gscore",
+      "integrate": "external_integrate",
+      "load": "external_load",
+      "mad": "external_mad",
+      "map_clusters": "external_map_clusters",
+      "paired_lfc": "external_paired_lfc",
+      "run": "external_run",
+      "summary": "external_summary"
+    },
+    "pseudo": {
+      "CFG": "pseudo_CFG",
+      "DC": "pseudo_DC",
+      "DROP": "pseudo_DROP",
+      "OUT": "pseudo_OUT",
+      "PROG": "pseudo_PROG",
+      "PROJ": "pseudo_PROJ",
+      "PUB": "pseudo_PUB",
+      "RNG": "pseudo_RNG",
+      "ROOT": "pseudo_ROOT",
+      "SETS": "pseudo_SETS",
+      "TARGET": "pseudo_TARGET",
+      "load": "pseudo_load",
+      "main": "pseudo_main",
+      "mixtures": "pseudo_mixtures",
+      "natural": "pseudo_natural",
+      "partial_spearman": "pseudo_partial_spearman",
+      "scores": "pseudo_scores",
+      "verdict": "pseudo_verdict"
+    }
+  },
+  "changes": [
+    "No plotting or layout dependencies",
+    "Read-only cached inputs resolved separately from new outputs",
+    "Two numerical threads; original training batch sizes and seeds retained",
+    "Bounded clean loop refuses a final atlas if suspect clusters remain",
+    "Removal ledger uses the actual clean-round list"
+  ]
+}

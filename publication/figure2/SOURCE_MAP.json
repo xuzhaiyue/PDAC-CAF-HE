@@ -1,0 +1,74 @@
+{
+  "patient_benchmark": [
+    {
+      "path": "he/he_01_cache_features.py",
+      "sha256": "29d48b00c96382fc768f0e7f798f915341b6431d43cf9caa8c639926c80dd1b9"
+    },
+    {
+      "path": "he/he_05_extract_tcga_uni2h.py",
+      "sha256": "f88f8832e9427278360b51f10ba248ec6659d6562abf450fdd28863ab9e00480"
+    },
+    {
+      "path": "he/he_03_ridge_gc_protocol.py",
+      "sha256": "c2f3242e25ad0197959a3ff20b5fb156730c3abb78f5d6a78bcb01b070f8414e"
+    },
+    {
+      "path": "he/he_06_nested_nn.py",
+      "sha256": "2cb21fe905387eaccfa4c6fd6ca9dbb28761535db5d01aad87d40f2e295e26e9"
+    },
+    {
+      "path": "he/he_07_stroma_replication.py",
+      "sha256": "4de52012cb6436d28b3493ea38e3177e66ff6a14c26c9dd549f036e35b672a67"
+    },
+    {
+      "path": "he/he_08_stroma_model.py",
+      "sha256": "ccaacd66668c9808886c1d5170f979a2761c6aa7c3138e0c55a6eea68eec232c"
+    }
+  ],
+  "spatial_baseline": [
+    {
+      "path": "he/he_09_hd_tiles.py",
+      "sha256": "5d5af217c30b7e044832161b3e5069b8ba6eb8f5bcbdca728c81ee96ebe52068"
+    },
+    {
+      "path": "he/he_16_geo_pdac_features.py",
+      "sha256": "37eeb562e3a081a88419533031a9100f2b0a759992344253a4b548173158880b"
+    },
+    {
+      "path": "he/he_21_bulk_vs_spatial_teacher.py",
+      "sha256": "feb5fe6e3133ebe0c0fda7a3bca5f89f3fa32ddb6c33216d40d635816e663035"
+    },
+    {
+      "path": "he/he_22_a10_scale_robustness.py",
+      "sha256": "5e2c101407df5aa8c113d95435a57fbe37cd03ce47c13f5574a7d5e3c3b6f5c2"
+    }
+  ],
+  "stain_normalisation": [
+    {
+      "path": "he/he_27_a15_stain_intervention.py",
+      "sha256": "0f533e4f14dae9ed485df9e24fdf8691df2b795f61b999fc3c15c6d9243243af"
+    }
+  ],
+  "shared": [
+    {
+      "path": "he/he_14_pancancer_pretrain.py",
+      "sha256": "ce097e9509f08fa8157d0fb509bcc8998c5490302db1d99b1891f861a3aa7a3d"
+    },
+    {
+      "path": "src/hemorph/config.py",
+      "sha256": "442479758f6e4ab73454dee76244003e64a67788a0d936ec677b6ed098d86e94"
+    },
+    {
+      "path": "src/hemorph/expression.py",
+      "sha256": "65985206c5ea3b1e4e097752fa2da9befaccaca7e38e264c958abe14cd584df8"
+    },
+    {
+      "path": "src/hemorph/io_visiumhd.py",
+      "sha256": "62865d81fd8a2b921f2f092362d5d9de117ffa70eb4f0459efde95d3d4c68a51"
+    },
+    {
+      "path": "src/hemorph/he_image.py",
+      "sha256": "90096f1c1e9b1f144e0618d8771a58311fae9d5b1809d436d125bc6b9012cf35"
+    }
+  ]
+}

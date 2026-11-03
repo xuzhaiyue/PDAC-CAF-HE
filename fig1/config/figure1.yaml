@@ -1,0 +1,336 @@
+paths:
+  panin: ${FIG1_DATA_ROOT}
+  out_dir: SET_BY_RUN_DIR
+datasets:
+  CRA001160:
+    h5ad: 02_intermediate/2026-09-16_six_cohort_input_bundle/standardized/CRA001160.h5ad
+    lineage_col: lineage
+    fibro_labels:
+    - CAF
+    patient_col: patient_id
+    condition_col: condition
+    condition_map:
+      PDAC: PDAC_naive
+      Normal: normal_pancreas
+  GSE205013:
+    h5ad: 02_intermediate/2026-09-16_six_cohort_input_bundle/standardized/GSE205013.h5ad
+    lineage_col: lineage
+    fibro_labels:
+    - CAF
+    patient_col: patient_id
+    condition_col: condition
+    condition_map:
+      Naive: PDAC_naive
+      Chemo: PDAC_chemo
+  GSE278688:
+    mtx_dir: 01_raw/GSE278688_family
+    prefix: GSE278688_sc_
+    lineage_col: all_celltype
+    fibro_labels:
+    - CAF
+    - Stellate
+    patient_col: patients
+    condition_col: tissue
+    condition_map:
+      Tumor: PDAC_unknown_tx
+      Adjacent_normal: adjacent_normal
+    default_condition: non_tumor
+    exclude_conditions:
+    - non_tumor
+discovery_conditions:
+- PDAC_naive
+- PDAC_unknown_tx
+max_cells_per_patient: 500
+global_max_cells_per_patient: 2000
+lineage_markers:
+  Ductal_tumor:
+  - EPCAM
+  - KRT19
+  - KRT8
+  - KRT18
+  - KRT7
+  - MUC1
+  Acinar:
+  - PRSS1
+  - CPA1
+  - CELA3A
+  - CTRB2
+  Endocrine:
+  - INS
+  - GCG
+  - SST
+  - CHGA
+  Fibroblast:
+  - DCN
+  - LUM
+  - COL1A1
+  - COL1A2
+  - PDGFRA
+  - FAP
+  Pericyte:
+  - RGS5
+  - KCNJ8
+  - NOTCH3
+  - HIGD1B
+  Smooth_muscle:
+  - MYH11
+  - DES
+  - CNN1
+  - ACTG2
+  Endothelial:
+  - VWF
+  - CDH5
+  - PLVAP
+  - CLDN5
+  T_NK:
+  - CD3D
+  - CD3E
+  - CD2
+  - NKG7
+  - GNLY
+  B:
+  - MS4A1
+  - CD79A
+  - CD19
+  Plasma:
+  - JCHAIN
+  - MZB1
+  - IGKC
+  Myeloid:
+  - CD68
+  - CD14
+  - LYZ
+  - C1QA
+  - CSF1R
+  Mast:
+  - TPSAB1
+  - CPA3
+  - KIT
+  Schwann:
+  - S100B
+  - PLP1
+  - SOX10
+  - MPZ
+  Cycling:
+  - MKI67
+  - TOP2A
+random_seed: 20261018
+contaminant_markers:
+  pericyte:
+  - RGS5
+  - KCNJ8
+  - NOTCH3
+  - MCAM
+  - HIGD1B
+  smooth_muscle:
+  - MYH11
+  - DES
+  - CNN1
+  - ACTG2
+  epithelial:
+  - EPCAM
+  - KRT19
+  - KRT8
+  - KRT18
+  immune:
+  - PTPRC
+  - CD74
+  - LYZ
+  endothelial:
+  - VWF
+  - CDH5
+  - PLVAP
+  acinar:
+  - PRSS1
+  - CPA1
+  - CELA3A
+caf_reference:
+  myCAF:
+  - ACTA2
+  - TAGLN
+  - MYL9
+  - TPM2
+  - MMP11
+  - POSTN
+  - COL10A1
+  - CTHRC1
+  iCAF:
+  - IL6
+  - CXCL12
+  - PDGFRA
+  - CFD
+  - DPT
+  - C3
+  - LMNA
+  - HAS1
+  apCAF:
+  - CD74
+  - HLA-DRA
+  - HLA-DRB1
+  - SLPI
+  - SAA3
+  - KRT19
+  pan_CAF:
+  - COL1A1
+  - COL1A2
+  - COL3A1
+  - DCN
+  - LUM
+  - PDGFRB
+  - FAP
+  - SPARC
+global_annotation_overrides:
+  '1': Neutrophil_RBC
+  '11': Ductal_normal
+  '6': Low_quality
+  '4': Pericyte_SMC
+  '20': pDC
+  '21': Tuft
+  '24': Hepatocyte_like
+  '17': Ambiguous
+signature:
+  caf_h5ad: integrate_caf_v2/fibro_integrated.h5ad
+  cluster_key: leiden_0.5
+  target_clusters:
+  - '6'
+  exclude_from_reference:
+  - '3'
+  - '8'
+  min_cells_per_group: 10
+  min_log2fc: 1.0
+  max_fdr: 0.05
+  min_frac_patients_up: 0.8
+  min_target_cpm: 10
+  specificity_vs_nonmesenchymal: 3.0
+  specificity_vs_pericyte: 2.0
+  max_genes: 30
+  pancaf_max_abs_log2fc: 0.5
+  pancaf_n: 15
+  nonmesenchymal_lineages:
+  - Ductal_tumor
+  - Ductal_normal
+  - Acinar
+  - Endocrine
+  - Endothelial
+  - T_NK
+  - B
+  - Plasma
+  - Myeloid
+  - Mast
+  - Schwann
+  - Neutrophil_RBC
+  - pDC
+  - Tuft
+signature_v2:
+  fdr_scope: pooled_patients
+  min_fib_contribution: 0.6
+  contribution_conditions:
+  - PDAC_naive
+  - PDAC_unknown_tx
+  pancaf_min_fib_cpm: 100
+cell_qc:
+  mad_k: 3
+  min_genes: 500
+  max_mt_floor: 10
+  remove_predicted_doublets: true
+cluster_exclusion:
+  pericyte_smc_mean_frac: 0.4
+  low_complexity_ratio: 0.5
+  epithelial_score: 0.5
+  immune_score: 0.5
+signature_v3:
+  caf_h5ad: integrate_caf_final/fibro_integrated.h5ad
+  target_clusters:
+  - '2'
+  exclude_from_reference: []
+signature_v4:
+  exclude_genes:
+  - HTRA3
+external_validation:
+  bundle: ${FIG1_EXTERNAL_BUNDLE}
+  datasets:
+    GSE242230:
+      modality: scRNA
+      files: GSE242230_per_sample/*.h5ad
+      keep_tissue: tumor_primary
+    GSE202051:
+      modality: snRNA
+      files: standardized/GSE202051.h5ad
+    GSE253429:
+      modality: snRNA
+      files: GSE253429_per_sample/*.h5ad
+    GSE291124:
+      modality: snRNA
+      files: standardized/GSE291124_per_sample/*.h5ad
+  cap_per_sample: 2000
+  qc:
+    mad_k: 3
+    min_genes:
+      scRNA: 500
+      snRNA: 300
+    max_mt_floor:
+      scRNA: 10
+      snRNA: 5
+  lineage_min_margin: 0.2
+  caf_resolution: 0.5
+  mapping:
+    markers_per_subtype: 50
+    min_r: 0.3
+  presence_min_cafs: 30
+  presence_frac: 0.05
+  success:
+    mapped_cthrc1: true
+    min_auroc: 0.85
+    min_genes_up: 7
+  min_mapped_cells_for_test: 100
+decoupling:
+  natural:
+    min_caf_atlas_cells: 30
+  mixtures:
+    n_cells: 2000
+    caf_frac:
+    - 0.05
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.5
+    cthrc1_frac:
+    - 0.0
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.5
+    - 0.7
+    reps: 10
+    conditions:
+    - PDAC_naive
+    - PDAC_unknown_tx
+    - PDAC_chemo
+  compare:
+  - program
+  - Moffitt_activated
+  - Dominguez_LRRC15
+  success:
+    mixtures_min_rho_state: 0.8
+    mixtures_max_abs_rho_caf: 0.2
+    natural_min_rho_state: 0.6
+    natural_max_abs_rho_caf: 0.3
+release:
+  caf_names:
+    '2': CTHRC1+ matrix myCAF
+    '1': HOPX+ F2R+ myCAF
+    '5': Glycolytic CAF
+    '0': C7+ C3+ iCAF
+    '4': MFAP5+ IGF1+ iCAF
+    '3': PI16+ universal
+    '6': SPP1+ IBSP+ CAF (8 patients)
+    '7': Chemo-associated CAF
+  caf_order:
+  - CTHRC1+ matrix myCAF
+  - HOPX+ F2R+ myCAF
+  - Glycolytic CAF
+  - C7+ C3+ iCAF
+  - MFAP5+ IGF1+ iCAF
+  - PI16+ universal
+  - SPP1+ IBSP+ CAF (8 patients)
+  - Chemo-associated CAF

@@ -2,7 +2,7 @@
 
 Analysis code for *"Spatially supervised histology mapping of a matrix-associated fibroblast programme in pancreatic ductal adenocarcinoma"*.
 
-The repository contains the analyses behind every number reported in the paper. Figures were drawn from the saved outputs of these analyses, and the plotted values are provided in the Supplementary Tables. Data are not included.
+The repository contains analysis code and table-level entry points for selected figures. Figure tables use archived predictions and statistical outputs. The supplementary material provides the reported results. Data are distributed separately.
 
 ## Data
 | Input | Accessions |
@@ -19,6 +19,9 @@ Local data paths are set in `config/fig1.yaml` and `config/aim1.yaml`.
 | Path | Analysis |
 |---|---|
 | `fig1/` | Single-cell atlas (scVI integration, QC, doublets, clustering stability), nine-gene programme and four-gene CAF reference, published-signature comparison, external validation, pseudo-bulk decoupling |
+| `publication/figure2/` | Figure 2 patient benchmark, spatial baseline and stain-normalisation tables |
+| `publication/figure3/` | Figure 3 spatial supervision tables |
+| `publication/figure5/` | Figure 5 survival and spatial niche tables |
 | `fig2/` | Bulk cohorts, ESTIMATE, programme scores, multi-cohort meta-analysis, joint state–abundance Cox models |
 | `he/` | H&E analyses A1–A17: UNI2-h features, bulk-supervised models, StRoMA replication, pan-cancer pretraining and PDAC fine-tuning, bulk vs spatial supervision, matched-field, matched supervision experiment, domain distance, stain normalisation, corrected physical fields, survival of predictions, D1 neighbourhood |
 | `src/hemorph/` | Shared functions |
@@ -29,6 +32,7 @@ Local data paths are set in `config/fig1.yaml` and `config/aim1.yaml`.
 Analysis rules and their order are recorded in `config/fig1.yaml`. Identifiers A1–A17 map to the analysis names in the paper through Supplementary Table S9.
 
 ## Running
+- See [Figure 1](fig1/README.md), [Figure 2](publication/figure2/README.md), [Figure 3](publication/figure3/README.md) and [Figure 5](publication/figure5/README.md) for inputs and commands. The Figure 2, 3 and 5 entry points start from archived tables.
 - Environments: `hemorph` (general analyses and H&E), `pdac_scvi` (scVI; set `NUMBA_THREADING_LAYER=workqueue`), `scRNA` and R.
 - Scripts in `he/` import each other; run them from inside `he/`.
 - Developed on Apple silicon with PyTorch MPS.
