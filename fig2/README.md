@@ -21,13 +21,13 @@ Run from the repository root with the hemorph environment. Give each command a n
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 FIG2_TABLES=results/manuscript_figures/2026-10-29_Figure2_v10/data
 FIG2_OUTPUT=results/code_release/figure2_new_run
-nice -n 19 python publication/figure2/analysis/01_patient_benchmark.py \
+nice -n 19 python fig2/01_patient_benchmark.py \
   --auc results/he/auc_summary.tsv --proxies results/he/positive_control_ceiling.tsv \
   --out "$FIG2_OUTPUT/patient"
-nice -n 19 python publication/figure2/analysis/02_spatial_baseline.py \
+nice -n 19 python fig2/02_spatial_baseline.py \
   --sections results/he/A12/2026-10-21_run01/slide_rho.tsv --regions "$FIG2_TABLES" \
   --out "$FIG2_OUTPUT/spatial"
-nice -n 19 python publication/figure2/analysis/03_stain_normalisation.py \
+nice -n 19 python fig2/03_stain_normalisation.py \
   --slides results/he/A15/2026-10-27_run01/slide_rho.tsv --out "$FIG2_OUTPUT/stain"
 ```
 

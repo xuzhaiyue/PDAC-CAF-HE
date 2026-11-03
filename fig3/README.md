@@ -4,7 +4,7 @@ Run from the repository root in the hemorph environment.
 
 ```bash
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
-nice -n 19 python publication/figure3/figure3_tables.py \
+nice -n 19 python fig3/figure3_tables.py \
   --a10 results/he/A10/2026-10-21_run01 \
   --a12 results/he/A12/2026-10-21_run01 \
   --a15 results/he/A15/2026-10-27_run01 \
