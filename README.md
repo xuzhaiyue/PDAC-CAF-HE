@@ -28,7 +28,7 @@ Local data paths are set in `config/fig1.yaml` and `config/aim1.yaml`.
 | `config/` | Analysis rules (`fig1.yaml`), gene sets, published signatures |
 | `env/` | Conda environments and R session info |
 
-Analysis rules and their order are recorded in `config/fig1.yaml`. Identifiers A1–A17 map to the analysis names in the paper through Supplementary Table S9.
+Analysis rules and their order are recorded in `config/fig1.yaml`. Supplementary Table S9 maps archived analysis identifiers A7–A17 to the analysis names used in the manuscript.
 
 ## Running
 - See [Figure 1](fig1/README.md), [Figure 2](fig2/README.md), [Figure 3](fig3/README.md) and [Figure 5](fig5/README.md) for inputs and commands. The Figure 2, 3 and 5 entry points start from archived tables.
